@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('link');
             $table->string('image');
             $table->timestamp('join_date');
-            $table->timestamp('expire_date');
+            // $table->timestamp('expire_date');
             $table->timestamps();
         });
     }

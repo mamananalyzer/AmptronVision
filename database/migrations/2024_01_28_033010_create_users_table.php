@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('is_active');
             $table->string('qr');
             $table->timestamp('join_date');
-            $table->timestamp('expire_date');
+            // $table->timestamp('expire_date');
             $table->timestamps();
         });
     }
