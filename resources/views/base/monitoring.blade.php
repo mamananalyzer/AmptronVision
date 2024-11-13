@@ -108,25 +108,25 @@
             window.addEventListener('resize', myChart.resize);
         </script> --}}
 
-        <div class="col-3">
+        <div class="col-lg-4 col-md-6">
             <div id="F" style="width: 350px; height: 200px;"></div>
         </div>
-        <div class="col-3">
+        <div class="col-lg-4 col-md-6">
             <div id="U1" style="width: 350px; height: 200px;"></div>
         </div>
-        <div class="col-3">
+        <div class="col-lg-4 col-md-6">
             <div id="U2" style="width: 350px; height: 200px;"></div>
         </div>
-        <div class="col-3">
+        <div class="col-lg-4 col-md-6">
             <div id="U3" style="width: 350px; height: 200px;"></div>
         </div>
-        <div class="col-3">
+        <div class="col-lg-4 col-md-6">
             <div id="U12" style="width: 350px; height: 200px;"></div>
         </div>
-        <div class="col-3">
+        <div class="col-lg-4 col-md-6">
             <div id="U23" style="width: 350px; height: 200px;"></div>
         </div>
-        <div class="col-3">
+        <div class="col-lg-4 col-md-6">
             <div id="U31" style="width: 350px; height: 200px;"></div>
         </div>
 
@@ -211,11 +211,11 @@
                                 {
                                     type: 'inside',
                                     start: 0,
-                                    end: 20
+                                    end: 100
                                 },
                                 {
                                     start: 0,
-                                    end: 20
+                                    end: 100
                                 }
                             ],
 
