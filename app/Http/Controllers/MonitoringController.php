@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Monitoring;
+use App\Models\Metering;
 use Illuminate\Http\Request;
 
 class MonitoringController extends Controller
@@ -12,10 +13,12 @@ class MonitoringController extends Controller
      */
     public function index()
     {
+        // $metering = Metering::all();
+
         // $monitoring = Monitoring::all();
-        $monitoring = Monitoring::where('sn', '1102200200321034')->latest()->take(14)->get();
-        // dd($monitoring->all());
-        return view('base.monitoring', compact('monitoring'));
+        // $monitoring = Monitoring::where('sn', '1102200200321034')->latest()->take(14)->get();
+        // dd($metering->all());
+        return view('base.monitoring');
     }
 
     /**

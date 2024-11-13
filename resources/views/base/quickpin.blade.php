@@ -33,183 +33,88 @@
 
 @section('content')
 <div class="flex-grow-1 container-p-y container-fluid">
-<div class="row mb-12 g-6">
-    <div class="card">
-    <div class="col-md-6 col-lg-4">
-    <!--<h6 class="mt-2 text-muted">Data Real Time Monitoring</h6>-->
-    <div class="card">
-    <div id="container" style="width: 600px; height: 400px;"></div>
-    
-   <!-- <script type="text/javascript">
-      var dom = document.getElementById('container');
-    //var dom = document.getElementById('container');
-    var myChart = echarts.init(dom, null, {
-      renderer: 'canvas',
-      useDirtyRect: false
-    });
-    var app = {};
-    
-    var option;
+    <div class="row mb-12 g-6">
+        <div class="card">
+        <div class="col-md-6 col-lg-4">
+        <!--<h6 class="mt-2 text-muted">Data Real Time Monitoring</h6>-->
+        <div class="card">
+        <div id="container" style="width: 600px; height: 400px;"></div>
 
-    function randomData() {
-  now = new Date(+now + oneDay);
-  value = value + Math.random() * 21 - 10;
-  return {
-    name: now.toString(),
-    value: [
-      [now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'),
-      Math.round(value)
-    ]
-  };
-}
-let data = [];
-let now = new Date(1997, 9, 3);
-let oneDay = 24 * 3600 * 1000;
-let value = Math.random() * 1000;
-for (var i = 0; i < 1000; i++) {
-  data.push(randomData());
-}
-option = {
-  title: {
-    text: 'Dynamic Data & Time Axis'
-  },
-  tooltip: {
-    trigger: 'axis',
-    formatter: function (params) {
-      params = params[0];
-      var date = new Date(params.name);
-      return (
-        date.getDate() +
-        '/' +
-        (date.getMonth() + 1) +
-        '/' +
-        date.getFullYear() +
-        ' : ' +
-        params.value[1]
-      );
-    },
-    axisPointer: {
-      animation: false
-    }
-  },
-  xAxis: {
-    type: 'time',
-    splitLine: {
-      show: false
-    }
-  },
-  yAxis: {
-    type: 'value',
-    boundaryGap: [0, '100%'],
-    splitLine: {
-      show: false
-    }
-  },
-  series: [
-    {
-      name: 'Fake Data',
-      type: 'line',
-      showSymbol: false,
-      data: data
-    }
-  ]
-};
-setInterval(function () {
-  for (var i = 0; i < 5; i++) {
-    data.shift();
-    data.push(randomData());
-  }
-  myChart.setOption({
-    series: [
-      {
-        data: data
-      }
-    ]
-  });
-}, 1000);
+        <script type="text/javascript">
+            var dom = document.getElementById('container');
+            var myChart = echarts.init(dom, null, {
+                renderer: 'canvas',
+                useDirtyRect: false
+            });
+            var app = {};
 
-    if (option && typeof option === 'object') {
-      myChart.setOption(option);
-    }
+            var option;
 
-    window.addEventListener('resize', myChart.resize);
-  </script> -->
+            // Data voltase berdasarkan waktu (menit dan detik)
+            let data = [
+                { name: '2024/11/13 00:01:00', value: ['2024/11/13 00:01:00', 150] },
+                { name: '2024/11/13 00:02:00', value: ['2024/11/13 00:02:00', 215] },
+                { name: '2024/11/13 00:03:00', value: ['2024/11/13 00:03:00', 180] },
+                { name: '2024/11/13 00:04:00', value: ['2024/11/13 00:04:00', 130] },
+                { name: '2024/11/13 00:05:00', value: ['2024/11/13 00:05:00', 225] },
+                { name: '2024/11/13 00:06:00', value: ['2024/11/13 00:06:00', 190] },
+                { name: '2024/11/13 00:07:00', value: ['2024/11/13 00:07:00', 222] }
+            ];
 
-  <script type="text/javascript">
-  var dom = document.getElementById('container');
-  var myChart = echarts.init(dom, null, {
-    renderer: 'canvas',
-    useDirtyRect: false
-  });
-  var app = {};
+            option = {
+                title: {
+                text: 'Voltage Over Time (Minutes and Seconds)'
+                },
+                tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                    params = params[0];
+                    var date = new Date(params.name);
+                    return (
+                    date.getHours().toString().padStart(2, '0') + ':' +
+                    date.getMinutes().toString().padStart(2, '0') + ':' +
+                    date.getSeconds().toString().padStart(2, '0') +
+                    ' : ' + params.value[1] + ' V'
+                    );
+                },
+                axisPointer: {
+                    animation: false
+                }
+                },
+                xAxis: {
+                type: 'time',
+                splitLine: {
+                    show: false
+                }
+                },
+                yAxis: {
+                type: 'value',
+                boundaryGap: [0, '100%'],
+                splitLine: {
+                    show: false
+                },
+                name: 'Voltage (V)'
+                },
+                series: [
+                {
+                    name: 'Voltage',
+                    type: 'line',
+                    showSymbol: true,
+                    data: data
+                }
+                ]
+            };
 
-  var option;
+            if (option && typeof option === 'object') {
+                myChart.setOption(option);
+            }
 
-  // Data voltase berdasarkan waktu (menit dan detik)
-  let data = [
-    { name: '2024/11/13 00:01:00', value: ['2024/11/13 00:01:00', 150] },
-    { name: '2024/11/13 00:02:00', value: ['2024/11/13 00:02:00', 215] },
-    { name: '2024/11/13 00:03:00', value: ['2024/11/13 00:03:00', 180] },
-    { name: '2024/11/13 00:04:00', value: ['2024/11/13 00:04:00', 130] },
-    { name: '2024/11/13 00:05:00', value: ['2024/11/13 00:05:00', 225] },
-    { name: '2024/11/13 00:06:00', value: ['2024/11/13 00:06:00', 190] },
-    { name: '2024/11/13 00:07:00', value: ['2024/11/13 00:07:00', 222] }
-  ];
+            window.addEventListener('resize', myChart.resize);
+        </script>
 
-  option = {
-    title: {
-      text: 'Voltage Over Time (Minutes and Seconds)'
-    },
-    tooltip: {
-      trigger: 'axis',
-      formatter: function (params) {
-        params = params[0];
-        var date = new Date(params.name);
-        return (
-          date.getHours().toString().padStart(2, '0') + ':' +
-          date.getMinutes().toString().padStart(2, '0') + ':' +
-          date.getSeconds().toString().padStart(2, '0') +
-          ' : ' + params.value[1] + ' V'
-        );
-      },
-      axisPointer: {
-        animation: false
-      }
-    },
-    xAxis: {
-      type: 'time',
-      splitLine: {
-        show: false
-      }
-    },
-    yAxis: {
-      type: 'value',
-      boundaryGap: [0, '100%'],
-      splitLine: {
-        show: false
-      },
-      name: 'Voltage (V)'
-    },
-    series: [
-      {
-        name: 'Voltage',
-        type: 'line',
-        showSymbol: true,
-        data: data
-      }
-    ]
-  };
-
-  if (option && typeof option === 'object') {
-    myChart.setOption(option);
-  }
-
-  window.addEventListener('resize', myChart.resize);
-</script>
-
+        </div>
     </div>
-  </div>
+        </div>
     </div>
-</div>
 </div>
 @endsection
