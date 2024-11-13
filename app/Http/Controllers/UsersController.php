@@ -62,9 +62,9 @@ class UsersController extends Controller
                 return $user->created_at->format('Y-m-d H:i');
             })
             ->addColumn('action', function($user) {
-                $showUrl = route('users.show', $user->id_user); 
-                $editUrl = route('users.edit', $user->id_user); 
-                $deleteUrl = route('users.destroy', $user->id_user); 
+                $showUrl = route('users.show', $user->id_user);
+                $editUrl = route('users.edit', $user->id_user);
+                $deleteUrl = route('users.destroy', $user->id_user);
                 return '
                     <a href="'.$showUrl.'" class="btn btn-xs btn-primary">View</a>
                     <a href="'.$editUrl.'" class="btn btn-xs btn-primary">Edit</a>
@@ -86,7 +86,7 @@ class UsersController extends Controller
      */
     public function create()
     {
-        
+
     }
 
     /**
@@ -108,15 +108,15 @@ class UsersController extends Controller
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Adjust the allowed file types and size as needed
             'role_id' => 'required'
         ]);
-        
+
         // Provide a default value for 'is_active'
         $validatedData['password'] = $request->input('password', '12345');
-        $passwordHashed = Hash::make($validatedData['password']);        
+        $passwordHashed = Hash::make($validatedData['password']);
 
         $yearOfJoin = Carbon::now()->year;
         // $randomNumber = generateRandomDigits(4);
         $validatedData['id_no'] = $yearOfJoin . 1234;
-        
+
         $validatedData['company'] = $request->input('company', "PT. LyZer-Tech");
         $validatedData['is_active'] = $request->input('is_active', 1);
 
@@ -124,8 +124,8 @@ class UsersController extends Controller
         $qrCodePath = 'qrcodes/' . $validatedData['id_no'] . '.png';
         // QrCode::format('png')->size(200)->generate($validatedData['id_no'], storage_path('app/public/' . $qrCodePath));
         // Store QR code path in the validated data
-        $validatedData['qr'] = $qrCodePath;     
-        
+        $validatedData['qr'] = $qrCodePath;
+
         $validatedData['join_date'] = Carbon::now();
         $validatedData['expire_date'] = Carbon::now()->addYears(5);
 
@@ -136,7 +136,7 @@ class UsersController extends Controller
         } else {
             return redirect()->back()->withErrors(['image' => 'Image upload failed'])->withInput();
         }
-        
+
         // Create a new User instance
         $user = new User([
             'name' => $validatedData['name'],
@@ -168,7 +168,7 @@ class UsersController extends Controller
         $validatedData = $request->validate([
             'role' => 'required|string|max:255',
         ]);
-        
+
         // Create a new User instance
         $role = new Role([
             'role' => $validatedData['role'],
