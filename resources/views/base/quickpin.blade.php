@@ -190,6 +190,19 @@ setInterval(function () {
       },
       name: 'Voltage (V)'
     },
+    
+    dataZoom: [
+    {
+      type: 'inside',
+      start: 0,
+      end: 20
+    },
+    {
+      start: 0,
+      end: 20
+    }
+  ],
+
     series: [
       {
         name: 'Voltage',
