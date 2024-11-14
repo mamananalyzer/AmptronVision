@@ -35,7 +35,7 @@
 <div class="flex-grow-1 container-p-y container-fluid">
   <div class="row mb-12 g-6">
     <div class="card">
-      <div class="col-md-6 col-lg-4">
+      <div class="col-md-6 col-lg-8">
         <!--<h6 class="mt-2 text-muted">Data Real Time Monitoring</h6>-->
         <div class="card">
           <div class="card-header py-4">
@@ -59,9 +59,22 @@
           <div class="tab-content pt-0">
             <div class="tab-pane fade active show" id="navs-pills-browser" role="tabpanel">
               <div class="table-responsive text-start">
-                <table class="table table-borderless text-nowrap">
-                  <div id="container" style="width: 600px; height: 400px;"></div>
-                </table>
+                <!--<table class="table table-borderless text-nowrap"></table>-->
+                  <div id="container" style="width: 600px; height: 400px; overflow: hidden;"></div>
+                  <style>
+                    #container {
+                      width: 100%;
+                      /* Pastikan menempati seluruh lebar kontainer induk */
+                      height: 400px;
+                      /* Tinggi spesifik agar tidak terpotong */
+                      overflow: hidden;
+                    }
+
+                    /* Pastikan tabel responsif tidak menyebabkan overflow */
+                    .table-responsive {
+                      overflow-x: auto;
+                    }
+                  </style>
                 <script type="text/javascript">
                   var dom = document.getElementById('container');
                   var myChart = echarts.init(dom, null, {
@@ -122,11 +135,11 @@
                       {
                         type: 'inside',
                         start: 0,
-                        end: 30
+                        end: 100
                       },
                       {
                         start: 0,
-                        end: 30
+                        end: 100
                       }
                     ],
 
