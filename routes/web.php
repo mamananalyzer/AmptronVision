@@ -15,6 +15,7 @@ use App\Http\Controllers\MotorController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\QuickpinController;
+use App\Http\Controllers\Quickpin_LabelController;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,6 +78,10 @@ Route::group(['middleware' => ['checkRole:1']], function() {
 });
 Route::group(['middleware' => ['checkRole:1,2,3,4,5,6,7,8,9,10,11,12,13']], function() {
     Route::get('/quickpin', [QuickpinController::class, 'index'])->name('quickpin.index');
+    
+});
+Route::group(['middleware' => ['checkRole:1']], function() {
+    Route::get('/Quickpin_Label', [QuickpinController::class, 'index']);
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -174,6 +179,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/quickpin/{id_user}/edit', [QuickpinController::class, 'edit'])->name('quickpin.edit');
     Route::delete('/quickpin/{id_user}', [QuickpinController::class, 'destroy'])->name('quickpin.destroy');
     Route::get('/quickpin/{id_user}/suspend', [QuickpinController::class, 'suspend'])->name('quickpin.suspend');
+
+    // Route::get('/Quickpin_Label', [Quickpin_LabelController::class, 'index']);
+    Route::get('/Quickpin_Label/data', [Quickpin_LabelController::class, 'getData'])->name('Quickpin_Label.data');
+    Route::get('/Quickpin_Label/{id_user}/show', [Quickpin_LabelController::class, 'show'])->name('Quickpin_Label.show');
+    Route::post('/Quickpin_Label.store', [Quickpin_LabelController::class, 'store'])->name('Quickpin_Label.create');
+    Route::get('/Quickpin_Label/{id_user}/edit', [Quickpin_LabelController::class, 'edit'])->name('Quickpin_Label.edit');
+    Route::delete('/Quickpin_Label/{id_user}', [Quickpin_LabelController::class, 'destroy'])->name('Quickpin_Label.destroy');
+    Route::get('/Quickpin_Label/{id_user}/suspend', [Quickpin_LabelController::class, 'suspend'])->name('Quickpin_Label.suspend');
 });
 
 

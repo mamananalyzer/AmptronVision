@@ -12,10 +12,12 @@ class QuickpinController extends Controller
      */
     public function index()
     {
-        return view('base.quickpin'
-        // , compact('totalBelanja', 'session')
+        return view(
+            'base.quickpin'
+            // , compact('totalBelanja', 'session')
         );
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -25,18 +27,18 @@ class QuickpinController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         //
     }
+    /**
+     * Store a newly created resource in storage.
+     */
 
     /**
      * Display the specified resource.
      */
-    public function show(Quickpin $quickpin)
+    public function show($created_at)
     {
         //
     }
@@ -44,15 +46,33 @@ class QuickpinController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Quickpin $quickpin)
+
+    public function edit(Quickpin $Quickpin)
     {
         //
     }
 
+
+    // public function edit(Quickpin $Quickpin)
+    //{
+    //
+    //}
+
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Quickpin $quickpin)
+
+    public function update(Request $request, Quickpin $Quickpin)
+    {
+        //
+    }
+
+    //public function update(Request $request, Quickpin $Quickpin)
+    //{
+    //
+    //}
+
+    public function destroy(Quickpin $Quickpin)
     {
         //
     }
@@ -60,8 +80,8 @@ class QuickpinController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Quickpin $quickpin)
-    {
-        //
-    }
+    //public function destroy(Quickpin $Quickpin)
+    //{
+    //
+    //}
 }
