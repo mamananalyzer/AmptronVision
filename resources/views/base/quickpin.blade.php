@@ -153,7 +153,7 @@
       </div>
     </div>
     <div class="col-sm-6 col-xl-3">
-      <div class="card">
+      <div class="card mb-4">
         <div class="card-body">
           <div class="d-flex align-items-start justify-content-between">
             <div class="content-left">
@@ -172,7 +172,7 @@
           </div>
         </div>
       </div>
-      <div class="card">
+      <div class="card mb-4">
         <div class="card-body">
           <div class="d-flex align-items-start justify-content-between">
             <div class="content-left">
@@ -212,7 +212,7 @@
       </div>
     </div>
     <div class="col-sm-6 col-xl-3">
-      <div class="card">
+      <div class="card mb-4">
         <div class="card-body">
           <div class="d-flex align-items-start justify-content-between">
             <div class="content-left">
@@ -231,7 +231,7 @@
           </div>
         </div>
       </div>
-      <div class="card">
+      <div class="card mb-4">
         <div class="card-body">
           <div class="d-flex align-items-start justify-content-between">
             <div class="content-left">
