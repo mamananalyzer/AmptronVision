@@ -337,6 +337,7 @@
             renderChart('U12', 'U12 Over Time', 'Voltage (V)', 'U12', 'V');
             renderChart('U23', 'U23 Over Time', 'Voltage (V)', 'U23', 'V');
             renderChart('U31', 'U31 Over Time', 'Voltage (V)', 'U31', 'V');
+            
         </script>
     </div>
 </div>

@@ -28,126 +28,128 @@
           <ul class="nav nav-pills" role="tablist">
             <li class="nav-item" role="presentation">
               <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
-                data-bs-target="#navs-pills-browser" aria-controls="navs-pills-browser"
+                data-bs-target="#navs-pills-F" aria-controls="navs-pills-F"
                 aria-selected="true">Frequency</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-os"
-                aria-controls="navs-pills-os" aria-selected="false" tabindex="-1">Voltage 1</button>
+              <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-V1"
+                aria-controls="navs-pills-V1" aria-selected="false" tabindex="-1">Voltage 1</button>
             </li>
             <li class="nav-item" role="presentation">
               <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
-                data-bs-target="#navs-pills-country" aria-controls="navs-pills-country" aria-selected="false"
+                data-bs-target="#navs-pills-V2" aria-controls="navs-pills-V2" aria-selected="false"
                 tabindex="-1">Voltage 2</button>
             </li>
           </ul>
         </div>
         <div class="tab-content pt-0">
-          <div class="tab-pane fade active show" id="navs-pills-browser" role="tabpanel">
+          <div class="tab-pane fade active show" id="navs-pills-F" role="tabpanel">
             <div class="table-responsive text-start">
               <!--<table class="table table-borderless text-nowrap"></table>-->
-              <div id="container" style="width: 535px; height: 335px; overflow: hidden;"></div>
-              <style>
-                #container {
-                  width: 100%;
-                  /* Pastikan menempati seluruh lebar kontainer induk */
-                  height: 400px;
-                  /* Tinggi spesifik agar tidak terpotong */
-                  overflow: hidden;
-                }
-
-                /* Pastikan tabel responsif tidak menyebabkan overflow */
-                .table-responsive {
-                  overflow-x: auto;
-                }
-              </style>
-              <script type="text/javascript">
-                var dom = document.getElementById('container');
-                var myChart = echarts.init(dom, null, {
-                  renderer: 'canvas',
-                  useDirtyRect: false
-                });
-                var app = {};
-
-                var option;
-
-                // Data voltase berdasarkan waktu (menit dan detik)
-                let data = [
-                  { name: '2024/11/13 00:01:00', value: ['2024/11/13 00:01:00', 150] },
-                  { name: '2024/11/13 00:02:00', value: ['2024/11/13 00:02:00', 215] },
-                  { name: '2024/11/13 00:03:00', value: ['2024/11/13 00:03:00', 180] },
-                  { name: '2024/11/13 00:04:00', value: ['2024/11/13 00:04:00', 130] },
-                  { name: '2024/11/13 00:05:00', value: ['2024/11/13 00:05:00', 225] },
-                  { name: '2024/11/13 00:06:00', value: ['2024/11/13 00:06:00', 190] },
-                  { name: '2024/11/13 00:07:00', value: ['2024/11/13 00:07:00', 222] }
-                ];
-
-                option = {
-                  title: {
-                    text: 'Voltage Over Time (Minutes and Seconds)'
-                  },
-                  tooltip: {
-                    trigger: 'axis',
-                    formatter: function (params) {
-                      params = params[0];
-                      var date = new Date(params.name);
-                      return (
-                        date.getHours().toString().padStart(2, '0') + ':' +
-                        date.getMinutes().toString().padStart(2, '0') + ':' +
-                        date.getSeconds().toString().padStart(2, '0') +
-                        ' : ' + params.value[1] + ' V'
-                      );
-                    },
-                    axisPointer: {
-                      animation: false
-                    }
-                  },
-                  xAxis: {
-                    type: 'time',
-                    splitLine: {
-                      show: false
-                    }
-                  },
-                  yAxis: {
-                    type: 'value',
-                    boundaryGap: [0, '100%'],
-                    splitLine: {
-                      show: false
-                    },
-                    name: 'Voltage (V)'
-                  },
-
-                  dataZoom: [
-                    {
-                      type: 'inside',
-                      start: 0,
-                      end: 100
-                    },
-                    {
-                      start: 0,
-                      end: 100
-                    }
-                  ],
-
-                  series: [
-                    {
-                      name: 'Voltage',
-                      type: 'line',
-                      showSymbol: true,
-                      data: data
-                    }
-                  ]
-                };
-
-                if (option && typeof option === 'object') {
-                  myChart.setOption(option);
-                }
-
-                window.addEventListener('resize', myChart.resize);
-              </script>
+              <div id="containerF" style="width: 530px; height: 330px; overflow: hidden;"></div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="navs-pills-V1" role="tabpanel">
+            <div class="table-responsive text-start">
+              <!--<table class="table table-borderless text-nowrap"></table>-->
+              <div id="containerV1" style="width: 530px; height: 330px; overflow: hidden;"></div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="navs-pills-V2" role="tabpanel">
+            <div class="table-responsive text-start">
+              <!--<table class="table table-borderless text-nowrap"></table>-->
+              <div id="containerV2" style="width: 530px; height: 330px; overflow: hidden;"></div>
             </div>
           </div>
         </div>
+        <script type="text/javascript">
+          function renderChart(containerId, titleText, yAxisName, seriesName, unit, data) {
+            var dom = document.getElementById(containerId);
+            var myChart = echarts.init(dom, null, {
+              renderer: 'canvas',
+              useDirtyRect: false
+            });
+            //var app = {};
+
+            var option = {
+              title: {
+                text: titleText
+              },
+              tooltip: {
+                trigger: 'axis',
+                formatter: function (params) {
+                  params = params[0];
+                  var date = new Date(params.name);
+                  return (
+                    date.getHours().toString().padStart(2, '0') + ':' +
+                    date.getMinutes().toString().padStart(2, '0') + ':' +
+                    date.getSeconds().toString().padStart(2, '0') +
+                    ' : ' + params.value[1] + unit
+                  );
+                },
+                axisPointer: {
+                  animation: false
+                }
+              },
+              xAxis: {
+                type: 'time',
+                splitLine: { show: false }
+              },
+              yAxis: {
+                type: 'value',
+                boundaryGap: [0, '100%'],
+                splitLine: { show: false },
+                name: yAxisName
+              },
+              dataZoom: [
+                { type: 'inside', start: 0, end: 100 },
+                { start: 0, end: 100 }
+              ],
+              series: [
+                {
+                  name: seriesName,
+                  type: 'line',
+                  showSymbol: true,
+                  data: data
+                }
+              ]
+            };
+
+            if (option && typeof option === 'object') {
+              myChart.setOption(option);
+            }
+
+            window.addEventListener('resize', myChart.resize);
+          }
+
+          // Data untuk setiap grafik
+          let dataFrequency = [
+            { name: '2024/11/13 00:01:00', value: ['2024/11/13 00:01:00', 50] },
+            { name: '2024/11/13 00:02:00', value: ['2024/11/13 00:02:00', 52] },
+            { name: '2024/11/13 00:03:00', value: ['2024/11/13 00:03:00', 48] },
+            { name: '2024/11/13 00:04:00', value: ['2024/11/13 00:04:00', 49] },
+            { name: '2024/11/13 00:05:00', value: ['2024/11/13 00:05:00', 51] }
+          ];
+          let dataVoltage1 = [
+            { name: '2024/11/13 00:01:00', value: ['2024/11/13 00:01:00', 150] },
+            { name: '2024/11/13 00:02:00', value: ['2024/11/13 00:02:00', 170] },
+            { name: '2024/11/13 00:03:00', value: ['2024/11/13 00:03:00', 160] },
+            { name: '2024/11/13 00:04:00', value: ['2024/11/13 00:04:00', 180] },
+            { name: '2024/11/13 00:05:00', value: ['2024/11/13 00:05:00', 175] }
+          ];
+          let dataVoltage2 = [
+            { name: '2024/11/13 00:01:00', value: ['2024/11/13 00:01:00', 220] },
+            { name: '2024/11/13 00:02:00', value: ['2024/11/13 00:02:00', 225] },
+            { name: '2024/11/13 00:03:00', value: ['2024/11/13 00:03:00', 210] },
+            { name: '2024/11/13 00:04:00', value: ['2024/11/13 00:04:00', 230] },
+            { name: '2024/11/13 00:05:00', value: ['2024/11/13 00:05:00', 240] }
+          ];
+
+          // Render masing-masing grafik
+          renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'Frequency', ' Hz', dataFrequency);
+          renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'Voltage 1', ' V', dataVoltage1);
+          renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'Voltage 2', ' V', dataVoltage2);
+        </script>
       </div>
     </div>
     <div class="col-sm-6 col-xl-3">
@@ -189,6 +191,25 @@
           </div>
         </div>
       </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-start justify-content-between">
+            <div class="content-left">
+              <span>Active Users</span>
+              <div class="d-flex align-items-end mt-2">
+                <h4 class="mb-0 me-2">19,860</h4>
+                <small class="text-danger">(-14%)</small>
+              </div>
+              <p class="mb-0">Last week analytics</p>
+            </div>
+            <div class="avatar">
+              <span class="avatar-initial rounded bg-label-success">
+                <i class="bx bx-group bx-sm"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="col-sm-6 col-xl-3">
       <div class="card">
@@ -205,6 +226,25 @@
             <div class="avatar">
               <span class="avatar-initial rounded bg-label-success">
                 <i class="bx bx-group bx-sm"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-start justify-content-between">
+            <div class="content-left">
+              <span>Pending Users</span>
+              <div class="d-flex align-items-end mt-2">
+                <h4 class="mb-0 me-2">237</h4>
+                <small class="text-success">(+42%)</small>
+              </div>
+              <p class="mb-0">Last week analytics</p>
+            </div>
+            <div class="avatar">
+              <span class="avatar-initial rounded bg-label-warning">
+                <i class="bx bx-user-voice bx-sm"></i>
               </span>
             </div>
           </div>
