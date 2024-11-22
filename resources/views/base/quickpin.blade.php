@@ -163,7 +163,7 @@
               <p class="mb-0">Avarage Frequency </p>
             </div>
             <div class="avatar">
-            <img src="sneat/assets/img/icons/unicons/freq.png" alt="chart success" class="rounded" />
+              <img src="sneat/assets/img/icons/unicons/freq.png" alt="chart success" class="rounded" />
               <!--<span class="avatar-initial rounded bg-label-danger">
                 <i class="bx bx-user-check bx-sm"></i> 
               </span> -->
@@ -235,21 +235,24 @@
       </div>
       <div class="card mb-4">
         <div class="card-body">
-          <div class="d-flex align-items-start justify-content-between">
-            <div class="content-left">
-              <span>Pending Users</span>
-              <div class="d-flex align-items-end mt-2">
-                <h4 class="mb-0 me-2">237</h4>
-                <small class="text-success">(+42%)</small>
-              </div>
-              <p class="mb-0">Last week analytics</p>
+          <div class="card-title d-flex align-items-start justify-content-between">
+            <div class="avatar flex-shrink-0">
+              <img src="sneat/assets/img/icons/unicons/chart-success.png" alt="chart success" class="rounded" />
             </div>
-            <div class="avatar">
-              <span class="avatar-initial rounded bg-label-warning">
-                <i class="bx bx-user-voice bx-sm"></i>
-              </span>
+            <div class="dropdown">
+              <button class="btn p-0" type="button" id="cardOpt3" data-bs-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+                <i class="bx bx-dots-vertical-rounded"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
+                <a class="dropdown-item" href="javascript:void(0);">View More</a>
+                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
+              </div>
             </div>
           </div>
+          <span class="fw-semibold d-block mb-1">Voltage 2</span>
+          <h3 class="card-title mb-2">180 V</h3>
+          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +30 V</small>
         </div>
       </div>
       <div class="card">
