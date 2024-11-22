@@ -28,17 +28,15 @@
           <ul class="nav nav-pills" role="tablist">
             <li class="nav-item" role="presentation">
               <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
-                data-bs-target="#navs-pills-F" aria-controls="navs-pills-F"
-                aria-selected="true">Frequency</button>
+                data-bs-target="#navs-pills-F" aria-controls="navs-pills-F" aria-selected="true">Frequency</button>
             </li>
             <li class="nav-item" role="presentation">
               <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-V1"
                 aria-controls="navs-pills-V1" aria-selected="false" tabindex="-1">Voltage 1</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button type="button" class="nav-link" role="tab" data-bs-toggle="tab"
-                data-bs-target="#navs-pills-V2" aria-controls="navs-pills-V2" aria-selected="false"
-                tabindex="-1">Voltage 2</button>
+              <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-V2"
+                aria-controls="navs-pills-V2" aria-selected="false" tabindex="-1">Voltage 2</button>
             </li>
           </ul>
         </div>
@@ -159,36 +157,40 @@
             <div class="content-left">
               <span>Frequency</span>
               <div class="d-flex align-items-end mt-2">
-                <h4 class="mb-0 me-2">4,567</h4>
-                <small class="text-success">(+18%)</small>
+                <h4 class="mb-0 me-2">50 Hz</h4>
+                <small class="text-success">(+0,01%)</small>
               </div>
-              <p class="mb-0">Last week analytics </p>
+              <p class="mb-0">Avarage Frequency </p>
             </div>
             <div class="avatar">
-              <span class="avatar-initial rounded bg-label-danger">
-                <i class="bx bx-user-check bx-sm"></i>
-              </span>
+            <img src="sneat/assets/img/icons/unicons/freq.png" alt="chart success" class="rounded" />
+              <!--<span class="avatar-initial rounded bg-label-danger">
+                <i class="bx bx-user-check bx-sm"></i> 
+              </span> -->
             </div>
           </div>
         </div>
       </div>
       <div class="card mb-4">
         <div class="card-body">
-          <div class="d-flex align-items-start justify-content-between">
-            <div class="content-left">
-              <span>Active Users</span>
-              <div class="d-flex align-items-end mt-2">
-                <h4 class="mb-0 me-2">19,860</h4>
-                <small class="text-danger">(-14%)</small>
-              </div>
-              <p class="mb-0">Last week analytics</p>
+          <div class="card-title d-flex align-items-start justify-content-between">
+            <div class="avatar flex-shrink-0">
+              <img src="sneat/assets/img/icons/unicons/chart-success.png" alt="chart success" class="rounded" />
             </div>
-            <div class="avatar">
-              <span class="avatar-initial rounded bg-label-success">
-                <i class="bx bx-group bx-sm"></i>
-              </span>
+            <div class="dropdown">
+              <button class="btn p-0" type="button" id="cardOpt3" data-bs-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+                <i class="bx bx-dots-vertical-rounded"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
+                <a class="dropdown-item" href="javascript:void(0);">View More</a>
+                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
+              </div>
             </div>
           </div>
+          <span class="fw-semibold d-block mb-1">Voltage 1</span>
+          <h3 class="card-title mb-2">180 V</h3>
+          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +30 V</small>
         </div>
       </div>
       <div class="card">
