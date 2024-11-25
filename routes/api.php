@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function() {
     Route::get('metering', [MeteringController::class, 'index']);
     Route::post('metering', [MeteringController::class, 'store']);
+    // Route::post('acuvimdata', [MeteringController::class, 'storeacuvim']);
     Route::get('metering/{id}', [MeteringController::class, 'show']);
     Route::put('metering/{id}', [MeteringController::class, 'update']);
     Route::delete('metering/{id}', [MeteringController::class, 'destroy']);
