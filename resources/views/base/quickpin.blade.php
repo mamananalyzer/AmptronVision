@@ -60,6 +60,251 @@
             </div>
           </div>
         </div>
+
+        <script type="text/javascript">
+    // Helper function to add missing data points as null to break the line
+    function fillMissingData(data, intervalMinutes) {
+        const filledData = [];
+        const intervalMillis = intervalMinutes * 60 * 1000; // Convert minutes to milliseconds
+
+        for (let i = 0; i < data.length - 1; i++) {
+            filledData.push(data[i]);
+
+            const currentTime = new Date(data[i].name).getTime();
+            const nextTime = new Date(data[i + 1].name).getTime();
+
+            // If the gap between data points is greater than the interval, insert a null value
+            if (nextTime - currentTime > intervalMillis) {
+                filledData.push({ name: data[i + 1].name, value: [data[i + 1].name, null] });
+            }
+        }
+
+        // Add the last data point
+        filledData.push(data[data.length - 1]);
+        return filledData;
+    }
+
+    function renderChart(containerId, titleText, yAxisName, dataKey, unit) {
+        var dom = document.getElementById(containerId);
+        var myChart = echarts.init(dom, null, {
+            renderer: 'canvas',
+            useDirtyRect: false
+        });
+
+        fetch('http://127.0.0.1:8000/api/v1/metering')
+            .then(response => response.json())
+            .then(data => {
+                // Extract updated_at and specified dataKey values for the chart
+                let chartData = data.map(item => ({
+                    name: item.updated_at,
+                    value: [item.updated_at, item[dataKey]]
+                }));
+
+                // Calculate the minimum and maximum values for y-axis range
+                let values = chartData.map(item => item.value[1]).filter(val => val !== null);
+                let minVal = Math.min(...values);
+                let maxVal = Math.max(...values);
+
+                // Add some padding to the range for better readability
+                let rangePadding = (maxVal - minVal) * 0.1;
+                let yAxisMin = minVal - rangePadding;
+                let yAxisMax = maxVal + rangePadding;
+
+                // Fill missing data with nulls to break the line
+                let filledData = fillMissingData(chartData, 1); // 1-minute interval
+
+                var option = {
+                    title: {
+                        text: titleText
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        formatter: function (params) {
+                            params = params[0];
+                            let date = new Date(params.name);
+                            return (
+                                date.getHours().toString().padStart(2, '0') + ':' +
+                                date.getMinutes().toString().padStart(2, '0') + ':' +
+                                date.getSeconds().toString().padStart(2, '0') +
+                                ' : ' + (params.value[1] !== null ? params.value[1] + ' ' + unit : 'No Data')
+                            );
+                        },
+                        axisPointer: {
+                            animation: false
+                        }
+                    },
+                    xAxis: {
+                        type: 'time',
+                        splitLine: {
+                            show: false
+                        }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        boundaryGap: [0, '100%'],
+                        splitLine: {
+                            show: false
+                        },
+                        name: yAxisName,
+                        min: yAxisMin,
+                        max: yAxisMax
+                    },
+
+                    dataZoom: [
+                        {
+                            type: 'inside',
+                            start: 0,
+                            end: 100
+                        },
+                        {
+                            start: 0,
+                            end: 100
+                        }
+                    ],
+
+                    series: [
+                        {
+                            name: titleText,
+                            type: 'line',
+                            showSymbol: true,
+                            connectNulls: false, // Don't connect null values
+                            data: filledData
+                        }
+                    ]
+                };
+
+                myChart.setOption(option);
+            })
+            .catch(error => console.error('Error fetching data:', error));
+
+        window.addEventListener('resize', myChart.resize);
+    }
+
+    // Render charts with dynamic y-axis range
+    renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz');
+    renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V');
+    renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V');
+</script>
+
+        <!--<script type="text/javascript">
+        // Helper function to add missing data points as null to break the line
+        function fillMissingData(data, intervalMinutes) {
+            const filledData = [];
+            const intervalMillis = intervalMinutes * 60 * 1000; // Convert minutes to milliseconds
+
+            for (let i = 0; i < data.length - 1; i++) {
+                filledData.push(data[i]);
+
+                const currentTime = new Date(data[i].name).getTime();
+                const nextTime = new Date(data[i + 1].name).getTime();
+
+                // If the gap between data points is greater than the interval, insert a null value
+                if (nextTime - currentTime > intervalMillis) {
+                    filledData.push({ name: data[i + 1].name, value: [data[i + 1].name, null] });
+                }
+            }
+
+            // Add the last data point
+            filledData.push(data[data.length - 1]);
+            return filledData;
+        }
+
+        function renderChart(containerId, titleText, yAxisName, dataKey, unit) {
+            var dom = document.getElementById(containerId);
+            var myChart = echarts.init(dom, null, {
+                renderer: 'canvas',
+                useDirtyRect: false
+            });
+
+            fetch('http://127.0.0.1:8000/api/v1/metering')
+                .then(response => response.json())
+                .then(data => {
+                    // Extract updated_at and specified dataKey values for the chart
+                    let chartData = data.map(item => ({
+                        name: item.updated_at,
+                        value: [item.updated_at, item[dataKey]]
+                    }));
+
+                    // Fill missing data with nulls to break the line
+                    let filledData = fillMissingData(chartData, 1); // 1-minute interval
+
+                    var option = {
+                        title: {
+                            text: titleText
+                        },
+                        tooltip: {
+                            trigger: 'axis',
+                            formatter: function (params) {
+                                params = params[0];
+                                let date = new Date(params.name);
+                                return (
+                                    date.getHours().toString().padStart(2, '0') + ':' +
+                                    date.getMinutes().toString().padStart(2, '0') + ':' +
+                                    date.getSeconds().toString().padStart(2, '0') +
+                                    ' : ' + (params.value[1] !== null ? params.value[1] + ' ' + unit : 'No Data')
+                                );
+                            },
+                            axisPointer: {
+                                animation: false
+                            }
+                        },
+                        xAxis: {
+                            type: 'time',
+                            splitLine: {
+                                show: false
+                            }
+                        },
+                        yAxis: {
+                            type: 'value',
+                            boundaryGap: [0, '100%'],
+                            splitLine: {
+                                show: false
+                            },
+                            name: yAxisName
+                        },
+
+                        dataZoom: [
+                            {
+                                type: 'inside',
+                                start: 0,
+                                end: 100
+                            },
+                            {
+                                start: 0,
+                                end: 100
+                            }
+                        ],
+
+                        series: [
+                            {
+                                name: titleText,
+                                type: 'line',
+                                showSymbol: true,
+                                connectNulls: false, // Don't connect null values
+                                data: filledData
+                            }
+                        ]
+                    };
+
+                    myChart.setOption(option);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+
+            window.addEventListener('resize', myChart.resize);
+        }
+
+        // Render Frequency and U1 charts
+        renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz');
+        renderChart('containerV1', 'U1 Over Time', 'Voltage (V)', 'U1', 'V');
+        renderChart('containerV2', 'U2 Over Time', 'Voltage (V)', 'U2', 'V');
+        // renderChart('U3', 'U3 Over Time', 'Voltage (V)', 'U3', 'V');
+        // renderChart('U12', 'U12 Over Time', 'Voltage (V)', 'U12', 'V');
+        // renderChart('U23', 'U23 Over Time', 'Voltage (V)', 'U23', 'V');
+        // renderChart('U31', 'U31 Over Time', 'Voltage (V)', 'U31', 'V');
+    </script> -->
+
+
+       <!-- 
         <script type="text/javascript">
           function renderChart(containerId, titleText, yAxisName, seriesName, unit, data) {
             var dom = document.getElementById(containerId);
@@ -147,9 +392,17 @@
           renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'Frequency', ' Hz', dataFrequency);
           renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'Voltage 1', ' V', dataVoltage1);
           renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'Voltage 2', ' V', dataVoltage2);
-        </script>
+        </script> -->
       </div>
     </div>
+
+    <style>
+.text-successF {
+            color: #28a745;
+        }
+
+    </style>
+
     <div class="col-sm-6 col-xl-3">
       <div class="card mb-4">
         <div class="card-body">
@@ -157,10 +410,10 @@
             <div class="content-left">
               <span>Frequency</span>
               <div class="d-flex align-items-end mt-2">
-                <h4 class="mb-0 me-2">50 Hz</h4>
-                <small class="text-success">(+0,01%)</small>
+                <h4 id="f-value" class="mb-0 me-2">-- Hz</h4>
+                <small id="f-change" class="text-success">-- </small>
               </div>
-              <p class="mb-0">Avarage Frequency </p>
+              <p class="mb-0">Real Time Frequency </p>
             </div>
             <div class="avatar">
               <img src="sneat/assets/img/icons/unicons/freq.png" alt="chart success" class="rounded" />
@@ -276,6 +529,61 @@
       </div>
     </div>
   </div>
+
+  <script type="text/javascript">
+         const apiUrl = 'http://127.0.0.1:8000/api/v1/metering'; // Replace with your API URL
+
+         let previousFValue = null; // Store the previous frequency value
+let updateTimeout = null; // Timeout reference for synchronized updates
+
+function updateVoltageDisplay() {
+    fetch(apiUrl) // Replace with your API URL
+        .then(response => response.json())
+        .then(data => {
+            // Assuming the latest data is the last item in the response array
+            const latestData = data[data.length - 1];
+
+            // Get the current frequency value
+            const currentFValue = latestData.F;
+            const fValueElement = document.getElementById('f-value');
+            const fChangeElement = document.getElementById('f-change');
+
+            // Calculate the percentage change for frequency
+            let fChange = 0;
+            if (previousFValue !== null) {
+                // Calculate percentage change only if previous value exists
+                fChange = ((currentFValue - previousFValue) / previousFValue) * 100;
+            }
+
+            // Update the frequency value and percentage change
+            fValueElement.textContent = `${currentFValue} Hz`;
+            fChangeElement.textContent = `(${fChange.toFixed(2)}%)`;
+
+            // Clear any existing timeout to prevent overlapping updates
+            if (updateTimeout) {
+                clearTimeout(updateTimeout);
+            }
+
+            // Set a timeout to clear both value and percentage change after 3 seconds
+            updateTimeout = setTimeout(() => {
+                fValueElement.textContent = ''; // Clear the frequency value
+                fChangeElement.textContent = ''; // Clear the percentage change
+            }, 3000); // Timeout duration in milliseconds
+
+            // Store the current frequency value as the previous value for the next update
+            previousFValue = currentFValue;
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+}
+
+// Update every 3 seconds to match the timeout duration
+setInterval(updateVoltageDisplay, 3000);
+
+    </script>
+
+
 
   <div class="row mb-12 g-6">
     <div class="col-12 col-xl-12 mb-4">
