@@ -28,7 +28,7 @@
           <ul class="nav nav-pills" role="tablist">
             <li class="nav-item" role="presentation">
               <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab"
-                data-bs-target="#navs-pills-F" aria-controls="navs-pills-F" aria-selected="true">Frequency</button>
+                data-bs-target="#navs-pills-F" aria-controls="navs-pills-F" aria-selected="true">Freq</button>
             </li>
             <li class="nav-item" role="presentation">
               <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-V1"
@@ -37,6 +37,14 @@
             <li class="nav-item" role="presentation">
               <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-V2"
                 aria-controls="navs-pills-V2" aria-selected="false" tabindex="-1">Voltage 2</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-V3"
+                aria-controls="navs-pills-V3" aria-selected="false" tabindex="-1">Voltage 3</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-pills-VAvg"
+                aria-controls="navs-pills-VAvg" aria-selected="false" tabindex="-1">Avg Voltage</button>
             </li>
           </ul>
         </div>
@@ -57,6 +65,18 @@
             <div class="table-responsive text-start">
               <!--<table class="table table-borderless text-nowrap"></table>-->
               <div id="containerV2" style="width: 530px; height: 330px; overflow: hidden;"></div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="navs-pills-V3" role="tabpanel">
+            <div class="table-responsive text-start">
+              <!--<table class="table table-borderless text-nowrap"></table>-->
+              <div id="containerV3" style="width: 530px; height: 330px; overflow: hidden;"></div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="navs-pills-VAvg" role="tabpanel">
+            <div class="table-responsive text-start">
+              <!--<table class="table table-borderless text-nowrap"></table>-->
+              <div id="containerVAvg" style="width: 530px; height: 330px; overflow: hidden;"></div>
             </div>
           </div>
         </div>
@@ -153,11 +173,11 @@
                   dataZoom: [
                     {
                       type: 'inside',
-                      start: 0,
+                      start: 90,
                       end: 100
                     },
                     {
-                      start: 0,
+                      start: 90,
                       end: 100
                     }
                   ],
@@ -184,6 +204,8 @@
           renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz');
           renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V');
           renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V');
+          renderChart('containerV3', 'Voltage 3 Over Time', 'Voltage (V)', 'U3', 'V');
+          renderChart('containerVAvg', 'Avg Voltage Over Time', 'Voltage (V)', 'Uavg', 'V');
         </script>
 
         <!--<script type="text/javascript">
@@ -425,41 +447,40 @@
       </div>
       <div class="card mb-4">
         <div class="card-body">
-          <div class="card-title d-flex align-items-start justify-content-between">
-            <div class="avatar flex-shrink-0">
-              <img src="sneat/assets/img/icons/unicons/chart-success.png" alt="chart success" class="rounded" />
-            </div>
-            <div class="dropdown">
-              <button class="btn p-0" type="button" id="cardOpt3" data-bs-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-                <i class="bx bx-dots-vertical-rounded"></i>
-              </button>
-              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
-                <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
+          <div class="d-flex align-items-start justify-content-between">
+            <div class="content-left">
+              <span>Voltage 1</span>
+              <div class="d-flex align-items-end mt-2">
+                <h4 id="v1-value" class="mb-0 me-2">-- V</h4>
+                <small id="v1-change" class="text-success">-- </small>
               </div>
+              <p class="mb-0">Real Time Voltage 1 </p>
+            </div>
+            <div class="avatar">
+              <img src="sneat/assets/img/icons/unicons/freq.png" alt="chart success" class="rounded" />
+              <!--<span class="avatar-initial rounded bg-label-danger">
+                <i class="bx bx-user-check bx-sm"></i> 
+              </span> -->
             </div>
           </div>
-          <span class="fw-semibold d-block mb-1">Voltage 1</span>
-          <h3 id="v1-value" class="card-title mb-2">-- V</h3>
-          <small id="v1-change" class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>-- V</small>
         </div>
       </div>
       <div class="card">
         <div class="card-body">
           <div class="d-flex align-items-start justify-content-between">
             <div class="content-left">
-              <span>Active Users</span>
+              <span>Voltage 2</span>
               <div class="d-flex align-items-end mt-2">
-                <h4 class="mb-0 me-2">19,860</h4>
-                <small class="text-danger">(-14%)</small>
+                <h4 id="v2-value" class="mb-0 me-2">-- V</h4>
+                <small id="v2-change" class="text-success">-- </small>
               </div>
-              <p class="mb-0">Last week analytics</p>
+              <p class="mb-0">Real Time Voltage 2 </p>
             </div>
             <div class="avatar">
-              <span class="avatar-initial rounded bg-label-success">
-                <i class="bx bx-group bx-sm"></i>
-              </span>
+              <img src="sneat/assets/img/icons/unicons/freq.png" alt="chart success" class="rounded" />
+              <!--<span class="avatar-initial rounded bg-label-danger">
+                <i class="bx bx-user-check bx-sm"></i> 
+              </span> -->
             </div>
           </div>
         </div>
@@ -470,58 +491,58 @@
         <div class="card-body">
           <div class="d-flex align-items-start justify-content-between">
             <div class="content-left">
-              <span>Active Users</span>
+              <span>Voltage 3</span>
               <div class="d-flex align-items-end mt-2">
-                <h4 class="mb-0 me-2">19,860</h4>
-                <small class="text-danger">(-14%)</small>
+                <h4 id="v3-value" class="mb-0 me-2">-- V</h4>
+                <small id="v3-change" class="text-success">-- </small>
               </div>
-              <p class="mb-0">Last week analytics</p>
+              <p class="mb-0">Real Time Voltage 3 </p>
             </div>
             <div class="avatar">
-              <span class="avatar-initial rounded bg-label-success">
-                <i class="bx bx-group bx-sm"></i>
-              </span>
+              <img src="sneat/assets/img/icons/unicons/freq.png" alt="chart success" class="rounded" />
+              <!--<span class="avatar-initial rounded bg-label-danger">
+                <i class="bx bx-user-check bx-sm"></i> 
+              </span> -->
             </div>
           </div>
         </div>
       </div>
       <div class="card mb-4">
         <div class="card-body">
-          <div class="card-title d-flex align-items-start justify-content-between">
-            <div class="avatar flex-shrink-0">
-              <img src="sneat/assets/img/icons/unicons/chart-success.png" alt="chart success" class="rounded" />
-            </div>
-            <div class="dropdown">
-              <button class="btn p-0" type="button" id="cardOpt3" data-bs-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-                <i class="bx bx-dots-vertical-rounded"></i>
-              </button>
-              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOpt3">
-                <a class="dropdown-item" href="javascript:void(0);">View More</a>
-                <a class="dropdown-item" href="javascript:void(0);">Delete</a>
+          <div class="d-flex align-items-start justify-content-between">
+            <div class="content-left">
+              <span>Voltage Average</span>
+              <div class="d-flex align-items-end mt-2">
+                <h4 id="vavg-value" class="mb-0 me-2">-- V</h4>
+                <small id="vavg-change" class="text-success">-- </small>
               </div>
+              <p class="mb-0">Real Time Average Voltage</p>
+            </div>
+            <div class="avatar">
+              <img src="sneat/assets/img/icons/unicons/freq.png" alt="chart success" class="rounded" />
+              <!--<span class="avatar-initial rounded bg-label-danger">
+                <i class="bx bx-user-check bx-sm"></i> 
+              </span> -->
             </div>
           </div>
-          <span class="fw-semibold d-block mb-1">Voltage 2</span>
-          <h3 class="card-title mb-2">180 V</h3>
-          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +30 V</small>
         </div>
       </div>
       <div class="card">
-        <div class="card-body">
+      <div class="card-body">
           <div class="d-flex align-items-start justify-content-between">
             <div class="content-left">
-              <span>Pending Users</span>
+              <span>Total Energy</span>
               <div class="d-flex align-items-end mt-2">
-                <h4 class="mb-0 me-2">237</h4>
-                <small class="text-success">(+42%)</small>
+                <h4 id="totE-value" class="mb-0 me-2">-- kWh</h4>
+                <small id="totE-change" class="text-success">-- </small>
               </div>
-              <p class="mb-0">Last week analytics</p>
+              <p class="mb-0">Real Time Total Energy</p>
             </div>
             <div class="avatar">
-              <span class="avatar-initial rounded bg-label-warning">
-                <i class="bx bx-user-voice bx-sm"></i>
-              </span>
+              <img src="sneat/assets/img/icons/unicons/freq.png" alt="chart success" class="rounded" />
+              <!--<span class="avatar-initial rounded bg-label-danger">
+                <i class="bx bx-user-check bx-sm"></i> 
+              </span> -->
             </div>
           </div>
         </div>
@@ -537,6 +558,14 @@
     let previousVoltage = null; // Store previous voltage
     let previousFrequencyChange = null; // Store previous frequency change percentage
     let previousVoltageChange = null; // Store previous voltage change percentage
+    let previousVoltage2 = null; // Store previous voltage
+    let previousVoltageChange2 = null; // Store previous voltage change percentage
+    let previousVoltage3 = null; // Store previous voltage
+    let previousVoltageChange3 = null; // Store previous voltage change percentage
+    let previousVoltageAvg = null; // Store previous voltage
+    let previousVoltageChangeAvg = null; // Store previous voltage change percentage
+    let previousTotalEnergy = null; // Store previous total energy
+    let previousTotalEnergyChange = null; // Store previous total energy change percentage
 
     // Function to fetch and display the last 2 data points' frequency and voltage values
     function fetchAndDisplayLastTwoData() {
@@ -557,12 +586,24 @@
           // Get frequency (F) and voltage (U1) from the second-to-last entry (the last one was already displayed)
           const currentFrequency = lastTwoData[1].F;
           const currentVoltage = lastTwoData[1].U1;
+          const currentVoltage2 = lastTwoData[1].U2;
+          const currentVoltage3 = lastTwoData[1].U3;
+          const currentVoltageAvg = lastTwoData[1].Uavg;
+          const currentTotalEnergy = lastTwoData[1].Ep_sum;
 
           // Get HTML elements for displaying values
           const fValueElement = document.getElementById('f-value');
           const v1ValueElement = document.getElementById('v1-value');
+          const v2ValueElement = document.getElementById('v2-value');
+          const v3ValueElement = document.getElementById('v3-value');
+          const vAvgValueElement = document.getElementById('vavg-value');
+          const TotEValueElement = document.getElementById('totE-value');
           const fChangeElement = document.getElementById('f-change');
           const v1ChangeElement = document.getElementById('v1-change');
+          const v2ChangeElement = document.getElementById('v2-change');
+          const v3ChangeElement = document.getElementById('v3-change');
+          const vAvgChangeElement = document.getElementById('vavg-change');
+          const TotEChangeElement = document.getElementById('totE-change');
 
           // Calculate the percentage change for frequency
           let frequencyChange = 0;
@@ -580,19 +621,63 @@
             voltageChange = previousVoltageChange || 0; // If no change, keep the last change
           }
 
+          let voltageChange2 = 0;
+          if (previousVoltage2 !== null && currentVoltage2 !== previousVoltage2) {
+            voltageChange2 = ((currentVoltage2 - previousVoltage2) / previousVoltage2) * 100;
+          } else {
+            voltageChange2 = previousVoltageChange2 || 0; // If no change, keep the last change
+          }
+
+          let voltageChange3 = 0;
+          if (previousVoltage3 !== null && currentVoltage3 !== previousVoltage3) {
+            voltageChange3 = ((currentVoltage3 - previousVoltage3) / previousVoltage3) * 100;
+          } else {
+            voltageChange3 = previousVoltageChange3 || 0; // If no change, keep the last change
+          }
+
+          let voltageChangeAvg = 0;
+          if (previousVoltageAvg !== null && currentVoltageAvg !== previousVoltageAvg) {
+            voltageChangeAvg = ((currentVoltageAvg - previousVoltageAvg) / previousVoltageAvg) * 100;
+          } else {
+            voltageChangeAvg = previousVoltageChangeAvg || 0; // If no change, keep the last change
+          }
+
+          let TotEChange = 0;
+          if (previousTotalEnergy !== null && currentTotalEnergy !== previousTotalEnergy) {
+            TotEChange = ((currentTotalEnergy - previousTotalEnergy) / previousTotalEnergy);
+          } else {
+            TotEChange = previousTotalEnergyChange || 0; // If no change, keep the last change
+          }
+
           // Update the DOM with the frequency and voltage values
           fValueElement.textContent = `${currentFrequency} Hz`;
           v1ValueElement.textContent = `${currentVoltage} V`;
+          v2ValueElement.textContent = `${currentVoltage2} V`;
+          v3ValueElement.textContent = `${currentVoltage3} V`;
+          vAvgValueElement.textContent = `${currentVoltageAvg} V`;
+          TotEValueElement.textContent = `${currentTotalEnergy} kWh`;
 
           // Update the percentage change elements
           fChangeElement.textContent = `${frequencyChange.toFixed(2)}%`;
           v1ChangeElement.textContent = `${voltageChange.toFixed(2)}%`;
+          v2ChangeElement.textContent = `${voltageChange2.toFixed(2)}%`;
+          v3ChangeElement.textContent = `${voltageChange3.toFixed(2)}%`;
+          vAvgChangeElement.textContent = `${voltageChangeAvg.toFixed(2)}%`;
+          TotEChangeElement.textContent = `${TotEChange.toFixed(2)}`;
 
           // Store the current frequency, voltage, and changes as previous values for the next update
           previousFrequency = currentFrequency;
           previousVoltage = currentVoltage;
           previousFrequencyChange = frequencyChange;
           previousVoltageChange = voltageChange;
+          previousVoltage2 = currentVoltage2;
+          previousVoltageChange2 = voltageChange2;
+          previousVoltage3 = currentVoltage3;
+          previousVoltageChange3 = voltageChange3;
+          previousVoltageAvg = currentVoltageAvg;
+          previousVoltageChangeAvg = voltageChangeAvg;
+          previousTotalEnergy = currentTotalEnergy;
+          previousTotalEnergyChange = TotEChange;
         })
         .catch(error => {
           console.error('Error fetching data:', error);
