@@ -62,42 +62,42 @@
         </div>
 
         <script type="text/javascript">
-    // Helper function to add missing data points as null to break the line
-    function fillMissingData(data, intervalMinutes) {
-        const filledData = [];
-        const intervalMillis = intervalMinutes * 60 * 1000; // Convert minutes to milliseconds
+          // Helper function to add missing data points as null to break the line
+          function fillMissingData(data, intervalMinutes) {
+            const filledData = [];
+            const intervalMillis = intervalMinutes * 60 * 1000; // Convert minutes to milliseconds
 
-        for (let i = 0; i < data.length - 1; i++) {
-            filledData.push(data[i]);
+            for (let i = 0; i < data.length - 1; i++) {
+              filledData.push(data[i]);
 
-            const currentTime = new Date(data[i].name).getTime();
-            const nextTime = new Date(data[i + 1].name).getTime();
+              const currentTime = new Date(data[i].name).getTime();
+              const nextTime = new Date(data[i + 1].name).getTime();
 
-            // If the gap between data points is greater than the interval, insert a null value
-            if (nextTime - currentTime > intervalMillis) {
+              // If the gap between data points is greater than the interval, insert a null value
+              if (nextTime - currentTime > intervalMillis) {
                 filledData.push({ name: data[i + 1].name, value: [data[i + 1].name, null] });
+              }
             }
-        }
 
-        // Add the last data point
-        filledData.push(data[data.length - 1]);
-        return filledData;
-    }
+            // Add the last data point
+            filledData.push(data[data.length - 1]);
+            return filledData;
+          }
 
-    function renderChart(containerId, titleText, yAxisName, dataKey, unit) {
-        var dom = document.getElementById(containerId);
-        var myChart = echarts.init(dom, null, {
-            renderer: 'canvas',
-            useDirtyRect: false
-        });
+          function renderChart(containerId, titleText, yAxisName, dataKey, unit) {
+            var dom = document.getElementById(containerId);
+            var myChart = echarts.init(dom, null, {
+              renderer: 'canvas',
+              useDirtyRect: false
+            });
 
-        fetch('http://127.0.0.1:8000/api/v1/metering')
-            .then(response => response.json())
-            .then(data => {
+            fetch('http://127.0.0.1:8000/api/v1/metering')
+              .then(response => response.json())
+              .then(data => {
                 // Extract updated_at and specified dataKey values for the chart
                 let chartData = data.map(item => ({
-                    name: item.updated_at,
-                    value: [item.updated_at, item[dataKey]]
+                  name: item.updated_at,
+                  value: [item.updated_at, item[dataKey]]
                 }));
 
                 // Calculate the minimum and maximum values for y-axis range
@@ -114,77 +114,77 @@
                 let filledData = fillMissingData(chartData, 1); // 1-minute interval
 
                 var option = {
-                    title: {
-                        text: titleText
+                  title: {
+                    text: titleText
+                  },
+                  tooltip: {
+                    trigger: 'axis',
+                    formatter: function (params) {
+                      params = params[0];
+                      let date = new Date(params.name);
+                      return (
+                        date.getHours().toString().padStart(2, '0') + ':' +
+                        date.getMinutes().toString().padStart(2, '0') + ':' +
+                        date.getSeconds().toString().padStart(2, '0') +
+                        ' : ' + (params.value[1] !== null ? params.value[1] + ' ' + unit : 'No Data')
+                      );
                     },
-                    tooltip: {
-                        trigger: 'axis',
-                        formatter: function (params) {
-                            params = params[0];
-                            let date = new Date(params.name);
-                            return (
-                                date.getHours().toString().padStart(2, '0') + ':' +
-                                date.getMinutes().toString().padStart(2, '0') + ':' +
-                                date.getSeconds().toString().padStart(2, '0') +
-                                ' : ' + (params.value[1] !== null ? params.value[1] + ' ' + unit : 'No Data')
-                            );
-                        },
-                        axisPointer: {
-                            animation: false
-                        }
+                    axisPointer: {
+                      animation: false
+                    }
+                  },
+                  xAxis: {
+                    type: 'time',
+                    splitLine: {
+                      show: false
+                    }
+                  },
+                  yAxis: {
+                    type: 'value',
+                    boundaryGap: [0, '100%'],
+                    splitLine: {
+                      show: false
                     },
-                    xAxis: {
-                        type: 'time',
-                        splitLine: {
-                            show: false
-                        }
-                    },
-                    yAxis: {
-                        type: 'value',
-                        boundaryGap: [0, '100%'],
-                        splitLine: {
-                            show: false
-                        },
-                        name: yAxisName,
-                        min: yAxisMin,
-                        max: yAxisMax
-                    },
+                    name: yAxisName,
+                    min: yAxisMin,
+                    max: yAxisMax
+                  },
 
-                    dataZoom: [
-                        {
-                            type: 'inside',
-                            start: 0,
-                            end: 100
-                        },
-                        {
-                            start: 0,
-                            end: 100
-                        }
-                    ],
+                  dataZoom: [
+                    {
+                      type: 'inside',
+                      start: 0,
+                      end: 100
+                    },
+                    {
+                      start: 0,
+                      end: 100
+                    }
+                  ],
 
-                    series: [
-                        {
-                            name: titleText,
-                            type: 'line',
-                            showSymbol: true,
-                            connectNulls: false, // Don't connect null values
-                            data: filledData
-                        }
-                    ]
+                  series: [
+                    {
+                      name: titleText,
+                      type: 'line',
+                      showSymbol: true,
+                      connectNulls: false, // Don't connect null values
+                      data: filledData
+                    }
+                  ]
                 };
 
                 myChart.setOption(option);
-            })
-            .catch(error => console.error('Error fetching data:', error));
+              })
+              .catch(error => console.error('Error fetching data:', error));
 
-        window.addEventListener('resize', myChart.resize);
-    }
+            window.addEventListener('resize', myChart.resize);
+          }
 
-    // Render charts with dynamic y-axis range
-    renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz');
-    renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V');
-    renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V');
-</script>
+          // Render charts with dynamic y-axis range
+          renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz');
+          renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V');
+          renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V');
+        </script>
 
         <!--<script type="text/javascript">
         // Helper function to add missing data points as null to break the line
@@ -304,7 +304,7 @@
     </script> -->
 
 
-       <!-- 
+        <!-- 
         <script type="text/javascript">
           function renderChart(containerId, titleText, yAxisName, seriesName, unit, data) {
             var dom = document.getElementById(containerId);
@@ -397,10 +397,9 @@
     </div>
 
     <style>
-.text-successF {
-            color: #28a745;
-        }
-
+      .text-successF {
+        color: #28a745;
+      }
     </style>
 
     <div class="col-sm-6 col-xl-3">
@@ -442,8 +441,8 @@
             </div>
           </div>
           <span class="fw-semibold d-block mb-1">Voltage 1</span>
-          <h3 class="card-title mb-2">180 V</h3>
-          <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> +30 V</small>
+          <h3 id="v1-value" class="card-title mb-2">-- V</h3>
+          <small id="v1-change" class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i>-- V</small>
         </div>
       </div>
       <div class="card">
@@ -530,59 +529,175 @@
     </div>
   </div>
 
+
   <script type="text/javascript">
-         const apiUrl = 'http://127.0.0.1:8000/api/v1/metering'; // Replace with your API URL
+    const apiUrl = 'http://127.0.0.1:8000/api/v1/metering'; // Replace with your API URL
 
-         let previousFValue = null; // Store the previous frequency value
-let updateTimeout = null; // Timeout reference for synchronized updates
+    let previousFrequency = null; // Store previous frequency
+    let previousVoltage = null; // Store previous voltage
+    let previousFrequencyChange = null; // Store previous frequency change percentage
+    let previousVoltageChange = null; // Store previous voltage change percentage
 
-function updateVoltageDisplay() {
-    fetch(apiUrl) // Replace with your API URL
+    // Function to fetch and display the last 2 data points' frequency and voltage values
+    function fetchAndDisplayLastTwoData() {
+      fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
-            // Assuming the latest data is the last item in the response array
-            const latestData = data[data.length - 1];
+          console.log('API Response:', data); // Debug: Log the data
 
-            // Get the current frequency value
-            const currentFValue = latestData.F;
-            const fValueElement = document.getElementById('f-value');
-            const fChangeElement = document.getElementById('f-change');
+          // Check if there are at least two data points
+          if (data.length < 2) {
+            console.log('Not enough data to fetch the last 2 entries');
+            return;
+          }
 
-            // Calculate the percentage change for frequency
-            let fChange = 0;
-            if (previousFValue !== null) {
-                // Calculate percentage change only if previous value exists
-                fChange = ((currentFValue - previousFValue) / previousFValue) * 100;
-            }
+          // Get the last 2 data entries
+          const lastTwoData = data.slice(-2);
 
-            // Update the frequency value and percentage change
-            fValueElement.textContent = `${currentFValue} Hz`;
-            fChangeElement.textContent = `(${fChange.toFixed(2)}%)`;
+          // Get frequency (F) and voltage (U1) from the second-to-last entry (the last one was already displayed)
+          const currentFrequency = lastTwoData[1].F;
+          const currentVoltage = lastTwoData[1].U1;
 
-            // Clear any existing timeout to prevent overlapping updates
-            if (updateTimeout) {
-                clearTimeout(updateTimeout);
-            }
+          // Get HTML elements for displaying values
+          const fValueElement = document.getElementById('f-value');
+          const v1ValueElement = document.getElementById('v1-value');
+          const fChangeElement = document.getElementById('f-change');
+          const v1ChangeElement = document.getElementById('v1-change');
 
-            // Set a timeout to clear both value and percentage change after 3 seconds
-            updateTimeout = setTimeout(() => {
-                fValueElement.textContent = ''; // Clear the frequency value
-                fChangeElement.textContent = ''; // Clear the percentage change
-            }, 3000); // Timeout duration in milliseconds
+          // Calculate the percentage change for frequency
+          let frequencyChange = 0;
+          if (previousFrequency !== null && currentFrequency !== previousFrequency) {
+            frequencyChange = ((currentFrequency - previousFrequency) / previousFrequency) * 100;
+          } else {
+            frequencyChange = previousFrequencyChange || 0; // If no change, keep the last change
+          }
 
-            // Store the current frequency value as the previous value for the next update
-            previousFValue = currentFValue;
+          // Calculate the percentage change for voltage
+          let voltageChange = 0;
+          if (previousVoltage !== null && currentVoltage !== previousVoltage) {
+            voltageChange = ((currentVoltage - previousVoltage) / previousVoltage) * 100;
+          } else {
+            voltageChange = previousVoltageChange || 0; // If no change, keep the last change
+          }
+
+          // Update the DOM with the frequency and voltage values
+          fValueElement.textContent = `${currentFrequency} Hz`;
+          v1ValueElement.textContent = `${currentVoltage} V`;
+
+          // Update the percentage change elements
+          fChangeElement.textContent = `${frequencyChange.toFixed(2)}%`;
+          v1ChangeElement.textContent = `${voltageChange.toFixed(2)}%`;
+
+          // Store the current frequency, voltage, and changes as previous values for the next update
+          previousFrequency = currentFrequency;
+          previousVoltage = currentVoltage;
+          previousFrequencyChange = frequencyChange;
+          previousVoltageChange = voltageChange;
         })
         .catch(error => {
-            console.error('Error fetching data:', error);
+          console.error('Error fetching data:', error);
         });
-}
+    }
 
-// Update every 3 seconds to match the timeout duration
-setInterval(updateVoltageDisplay, 3000);
+    // Fetch and display the data when the page loads
+    document.addEventListener('DOMContentLoaded', fetchAndDisplayLastTwoData);
 
-    </script>
+    // Optionally, update the data every few seconds (e.g., every 3 seconds)
+    setInterval(fetchAndDisplayLastTwoData, 3000);
+  </script>
 
+  <!-- <script type="text/javascript">
+    const apiUrl = 'http://127.0.0.1:8000/api/v1/metering'; // Replace with your API URL
+
+    // Function to fetch and display the last 2 data points' frequency and voltage values
+    function fetchAndDisplayLastTwoData() {
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                console.log('API Response:', data); // Debug: Log the data
+
+                // Check if there are at least two data points
+                if (data.length < 2) {
+                    console.log('Not enough data to fetch the last 2 entries');
+                    return;
+                }
+
+                // Get the last 2 data entries
+                const lastTwoData = data.slice(-2);
+
+                // Get frequency (F) and voltage (U1) from the last two data entries
+                const frequency = lastTwoData[0].F; // Frequency of the second-to-last entry
+                const voltage = lastTwoData[0].U1; // Voltage of the second-to-last entr
+
+                // Get HTML elements for displaying values
+                const fValueElement = document.getElementById('f-value');
+                const v1ValueElement = document.getElementById('v1-value');
+
+                // Update the DOM with the frequency and voltage values from the last two entries
+                fValueElement.textContent = `${frequency} Hz`;
+                v1ValueElement.textContent =` ${voltage} V`;
+
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }
+
+    // Fetch and display the data when the page loads
+    document.addEventListener('DOMContentLoaded', fetchAndDisplayLastTwoData);
+</script>-->
+
+  <!--<script type="text/javascript">
+    const apiUrl = 'http://127.0.0.1:8000/api/v1/metering'; // Replace with your API URL
+
+    let previousFValue = null; // Store the previous frequency value
+    let updateTimeout = null; // Timeout reference for synchronized updates
+
+    function updateFreqDisplay() {
+      fetch(apiUrl) // Replace with your API URL
+        .then(response => response.json())
+        .then(data => {
+          
+          const latestData = data[data.length - 1];
+
+          // Get the current frequency value
+          const currentFValue = latestData.F;
+          const fValueElement = document.getElementById('f-value');
+          const fChangeElement = document.getElementById('f-change');
+
+          // Calculate the percentage change for frequency
+          let fChange = 0;
+          if (previousFValue !== null) {
+            // Calculate percentage change only if previous value exists
+            fChange = ((currentFValue - previousFValue) / previousFValue)*100;
+          }
+
+          // Update the frequency value and percentage change
+          fValueElement.textContent = `${currentFValue} Hz`;
+          fChangeElement.textContent = `(${fChange.toFixed(2)}%)`;
+
+          // Clear any existing timeout to prevent overlapping updates
+          if (updateTimeout) {
+            clearTimeout(updateTimeout);
+          }
+
+          // Set a timeout to clear both value and percentage change after 3 seconds
+          updateTimeout = setTimeout(() => {
+            fValueElement.textContent = ''; // Clear the frequency value
+            fChangeElement.textContent = ''; // Clear the percentage change
+          }, 3000); // Timeout duration in milliseconds
+
+          // Store the current frequency value as the previous value for the next update
+          previousFValue = currentFValue;
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    }
+
+    // Update every 3 seconds to match the timeout duration
+    setInterval(updateFreqDisplay, 3000);
+  </script> -->
 
 
   <div class="row mb-12 g-6">
