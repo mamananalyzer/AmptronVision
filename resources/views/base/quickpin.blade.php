@@ -4,6 +4,7 @@
 
 @section('link')
 <script src="sneat/assets/vendor/libs/apex-charts/echarts.min.js"></script>
+<script src="sneat/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 @section('zone-link')
 <!-- Optional: jQuery (required for DataTables) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -22,6 +23,14 @@
 <div class="flex-grow-1 container-p-y container-fluid">
   <div class="row mb-12 g-6">
     <div class="col-md-6 col-lg-6">
+      <div style="margin-bottom: 20px;">
+        <label for="datePicker" style="font-weight: bold; margin-right: 10px;">Select Date :</label>
+        <input id="datePicker" type="text" placeholder="Pick a date" />
+      </div>
+      <!-- <div class="mb-4">
+        <label for="datePicker">Select Date :</label>
+        <input type="date" id="datePicker" />
+      </div>-->
       <!--<h6 class="mt-2 text-muted">Data Real Time Monitoring</h6>-->
       <div class="card">
         <div class="card-header py-4">
@@ -82,6 +91,125 @@
         </div>
 
         <script type="text/javascript">
+          async function fetchData() {
+            try {
+              const response = await fetch('http://127.0.0.1:8000/api/v1/metering');
+              return await response.json();
+            } catch (error) {
+              console.error('Error fetching data:', error);
+              return [];
+            }
+          }
+
+          function renderChart(containerId, titleText, yAxisName, dataKey, unit, selectedDate) {
+            var dom = document.getElementById(containerId);
+            var myChart = echarts.init(dom, null, {
+              renderer: 'canvas',
+              useDirtyRect: false
+            });
+
+            fetchData()
+              .then(data => {
+                let filteredData = data.filter(item => {
+                  let itemDate = new Date(item.updated_at).toISOString().split('T')[0];
+                  return itemDate === selectedDate;
+                });
+
+                let chartData = filteredData.map(item => ({
+                  name: item.updated_at,
+                  value: [item.updated_at, item[dataKey]]
+                }));
+
+                let values = chartData.map(item => item.value[1]).filter(val => val !== null);
+                let minVal = Math.min(...values);
+                let maxVal = Math.max(...values);
+                let rangePadding = (maxVal - minVal) * 0.1;
+                let yAxisMin = minVal - rangePadding;
+                let yAxisMax = maxVal + rangePadding;
+
+                let option = {
+                  title: { text: titleText },
+                  tooltip: {
+                    trigger: 'axis',
+                    formatter: function (params) {
+                      params = params[0];
+                      let date = new Date(params.name);
+                      return (
+                        date.getHours().toString().padStart(2, '0') + ':' +
+                        date.getMinutes().toString().padStart(2, '0') + ':' +
+                        date.getSeconds().toString().padStart(2, '0') +
+                        ' : ' + (params.value[1] !== null ? params.value[1] + ' ' + unit : 'No Data')
+                      );
+                    },
+                    axisPointer: { animation: false }
+                  },
+                  xAxis: { type: 'time', splitLine: { show: false } },
+                  yAxis: {
+                    type: 'value',
+                    boundaryGap: [0, '100%'],
+                    splitLine: { show: false },
+                    name: yAxisName,
+                    min: yAxisMin,
+                    max: yAxisMax
+                  },
+                  dataZoom: [
+                    { type: 'inside', start: 90, end: 100 },
+                    { start: 90, end: 100 }
+                  ],
+                  series: [
+                    {
+                      name: titleText,
+                      type: 'line',
+                      showSymbol: true,
+                      connectNulls: false,
+                      data: chartData
+                    }
+                  ]
+                };
+
+                myChart.setOption(option);
+              })
+              .catch(error => console.error('Error rendering chart:', error));
+
+            window.addEventListener('resize', myChart.resize);
+          }
+
+          async function initializeFlatpickrAndCharts() {
+            const data = await fetchData();
+
+            const latestDate = data.length > 0 ? new Date(data[data.length - 1].updated_at).toISOString().split('T')[0] : null;
+
+            if (latestDate) {
+              // Initialize Flatpickr
+              flatpickr('#datePicker', {
+                defaultDate: latestDate, // Set default date
+                dateFormat: 'Y-m-d', // Format to match API
+                onChange: (selectedDates, dateStr) => {
+                  syncCharts(dateStr); // Update charts on date change
+                }
+              });
+
+              // Render charts with the latest date
+              syncCharts(latestDate);
+            } else {
+              console.error('No data available to initialize the charts.');
+            }
+          }
+
+          function syncCharts(selectedDate) {
+            renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz', selectedDate);
+            renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V', selectedDate);
+            renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V', selectedDate);
+            renderChart('containerV3', 'Voltage 3 Over Time', 'Voltage (V)', 'U3', 'V', selectedDate);
+            renderChart('containerVAvg', 'Average Voltage Over Time', 'Voltage (V)', 'Uavg', 'V', selectedDate);
+          }
+
+          // Initialize everything
+          initializeFlatpickrAndCharts();
+        </script>
+
+
+        <!--<script type="text/javascript">
           // Helper function to add missing data points as null to break the line
           function fillMissingData(data, intervalMinutes) {
             const filledData = [];
@@ -206,7 +334,7 @@
           renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V');
           renderChart('containerV3', 'Voltage 3 Over Time', 'Voltage (V)', 'U3', 'V');
           renderChart('containerVAvg', 'Avg Voltage Over Time', 'Voltage (V)', 'Uavg', 'V');
-        </script>
+        </script>-->
 
         <!--<script type="text/javascript">
         // Helper function to add missing data points as null to break the line
@@ -528,7 +656,7 @@
         </div>
       </div>
       <div class="card">
-      <div class="card-body">
+        <div class="card-body">
           <div class="d-flex align-items-start justify-content-between">
             <div class="content-left">
               <span>Total Energy</span>
