@@ -90,7 +90,7 @@
           </div>
         </div>
 
-        <script type="text/javascript">
+        <!--<script type="text/javascript">
           async function fetchData() {
             try {
               const response = await fetch('http://127.0.0.1:8000/api/v1/metering');
@@ -101,39 +101,46 @@
             }
           }
 
-          function renderChart(containerId, titleText, yAxisName, dataKey, unit, selectedDate) {
-            var dom = document.getElementById(containerId);
-            var myChart = echarts.init(dom, null, {
-              renderer: 'canvas',
-              useDirtyRect: false
-            });
+          function renderChart(containerId, titleText, yAxisName, dataKey, unit, selectedDate, chartInstances) {
+            const dom = document.getElementById(containerId);
+            if (!chartInstances[containerId]) {
+              chartInstances[containerId] = echarts.init(dom, null, {
+                renderer: 'canvas',
+                useDirtyRect: false
+              });
+            }
+            const myChart = chartInstances[containerId];
 
             fetchData()
               .then(data => {
-                let filteredData = data.filter(item => {
-                  let itemDate = new Date(item.updated_at).toISOString().split('T')[0];
+                // Filter data berdasarkan tanggal yang dipilih
+                const filteredData = data.filter(item => {
+                  const itemDate = new Date(item.updated_at).toISOString().split('T')[0];
                   return itemDate === selectedDate;
                 });
 
-                let chartData = filteredData.map(item => ({
+                // Format data untuk ECharts
+                const chartData = filteredData.map(item => ({
                   name: item.updated_at,
                   value: [item.updated_at, item[dataKey]]
                 }));
 
-                let values = chartData.map(item => item.value[1]).filter(val => val !== null);
-                let minVal = Math.min(...values);
-                let maxVal = Math.max(...values);
-                let rangePadding = (maxVal - minVal) * 0.1;
-                let yAxisMin = minVal - rangePadding;
-                let yAxisMax = maxVal + rangePadding;
+                // Hitung batas minimum dan maksimum Y-axis
+                const values = chartData.map(item => item.value[1]).filter(val => val !== null);
+                const minVal = values.length > 0 ? Math.min(...values) : 0;
+                const maxVal = values.length > 0 ? Math.max(...values) : 10;
+                const rangePadding = (maxVal - minVal) * 0.1;
+                const yAxisMin = minVal - rangePadding;
+                const yAxisMax = maxVal + rangePadding;
 
-                let option = {
+                // Konfigurasi ECharts
+                const option = {
                   title: { text: titleText },
                   tooltip: {
                     trigger: 'axis',
                     formatter: function (params) {
                       params = params[0];
-                      let date = new Date(params.name);
+                      const date = new Date(params.name);
                       return (
                         date.getHours().toString().padStart(2, '0') + ':' +
                         date.getMinutes().toString().padStart(2, '0') + ':' +
@@ -167,382 +174,341 @@
                   ]
                 };
 
+                // Tampilkan data pada grafik
                 myChart.setOption(option);
               })
               .catch(error => console.error('Error rendering chart:', error));
-
-            window.addEventListener('resize', myChart.resize);
           }
 
           async function initializeFlatpickrAndCharts() {
             const data = await fetchData();
 
-            const latestDate = data.length > 0 ? new Date(data[data.length - 1].updated_at).toISOString().split('T')[0] : null;
+            // Mendapatkan tanggal hari ini dalam format "YYYY-MM-DD"
+            const todayDate = new Date().toISOString().split('T')[0];
 
-            if (latestDate) {
-              // Initialize Flatpickr
-              flatpickr('#datePicker', {
-                defaultDate: latestDate, // Set default date
-                dateFormat: 'Y-m-d', // Format to match API
-                onChange: (selectedDates, dateStr) => {
-                  syncCharts(dateStr); // Update charts on date change
-                }
-              });
+            // Jika data tersedia, gunakan tanggal terbaru dari data, jika tidak gunakan hari ini
+            const latestDate = data.length > 0
+              ? new Date(data[data.length - 1].updated_at).toISOString().split('T')[0]
+              : todayDate;
 
-              // Render charts with the latest date
-              syncCharts(latestDate);
-            } else {
-              console.error('No data available to initialize the charts.');
-            }
+            // Initialize Flatpickr dengan tanggal default
+            flatpickr('#datePicker', {
+              defaultDate: latestDate, // Set default date ke tanggal terbaru atau hari ini
+              dateFormat: 'Y-m-d', // Format untuk mencocokkan API
+              onChange: (selectedDates, dateStr) => {
+                syncCharts(dateStr); // Perbarui grafik saat tanggal berubah
+              }
+            });
+
+            // Render grafik dengan tanggal default
+            syncCharts(latestDate);
           }
 
           function syncCharts(selectedDate) {
-            renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz', selectedDate);
-            renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V', selectedDate);
-            renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V', selectedDate);
-            renderChart('containerV3', 'Voltage 3 Over Time', 'Voltage (V)', 'U3', 'V', selectedDate);
-            renderChart('containerVAvg', 'Average Voltage Over Time', 'Voltage (V)', 'Uavg', 'V', selectedDate);
+            const chartInstances = {};
+            renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz', selectedDate, chartInstances);
+            renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V', selectedDate, chartInstances);
+            renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V', selectedDate, chartInstances);
+            renderChart('containerV3', 'Voltage 3 Over Time', 'Voltage (V)', 'U3', 'V', selectedDate, chartInstances);
+            renderChart('containerVAvg', 'Average Voltage Over Time', 'Voltage (V)', 'Uavg', 'V', selectedDate, chartInstances);
           }
 
           // Initialize everything
           initializeFlatpickrAndCharts();
-        </script>
 
+        </script>-->
 
-        <!--<script type="text/javascript">
-          // Helper function to add missing data points as null to break the line
-          function fillMissingData(data, intervalMinutes) {
-            const filledData = [];
-            const intervalMillis = intervalMinutes * 60 * 1000; // Convert minutes to milliseconds
+        <!-- <script type="text/javascript">
+          let latestData = {}; // Menyimpan data terakhir per grafik agar bisa membandingkan perubahan
 
-            for (let i = 0; i < data.length - 1; i++) {
-              filledData.push(data[i]);
-
-              const currentTime = new Date(data[i].name).getTime();
-              const nextTime = new Date(data[i + 1].name).getTime();
-
-              // If the gap between data points is greater than the interval, insert a null value
-              if (nextTime - currentTime > intervalMillis) {
-                filledData.push({ name: data[i + 1].name, value: [data[i + 1].name, null] });
-              }
+          async function fetchData() {
+            try {
+              const response = await fetch('http://127.0.0.1:8000/api/v1/metering');
+              return await response.json();
+            } catch (error) {
+              console.error('Error fetching data:', error);
+              return [];
             }
-
-            // Add the last data point
-            filledData.push(data[data.length - 1]);
-            return filledData;
           }
 
-          function renderChart(containerId, titleText, yAxisName, dataKey, unit) {
-            var dom = document.getElementById(containerId);
-            var myChart = echarts.init(dom, null, {
-              renderer: 'canvas',
-              useDirtyRect: false
-            });
+          function renderChart(containerId, titleText, yAxisName, dataKey, unit, selectedDate, chartInstances) {
+            const dom = document.getElementById(containerId);
+            if (!chartInstances[containerId]) {
+              chartInstances[containerId] = echarts.init(dom, null, {
+                renderer: 'canvas',
+                useDirtyRect: false
+              });
+            }
+            const myChart = chartInstances[containerId];
 
-            fetch('http://127.0.0.1:8000/api/v1/metering')
-              .then(response => response.json())
+            fetchData()
               .then(data => {
-                // Extract updated_at and specified dataKey values for the chart
-                let chartData = data.map(item => ({
+                // Filter data berdasarkan tanggal yang dipilih
+                const filteredData = data.filter(item => {
+                  const itemDate = new Date(item.updated_at).toISOString().split('T')[0];
+                  return itemDate === selectedDate;
+                });
+
+                // Format data untuk ECharts
+                const chartData = filteredData.map(item => ({
                   name: item.updated_at,
                   value: [item.updated_at, item[dataKey]]
                 }));
 
-                // Calculate the minimum and maximum values for y-axis range
-                let values = chartData.map(item => item.value[1]).filter(val => val !== null);
-                let minVal = Math.min(...values);
-                let maxVal = Math.max(...values);
+                // Cek jika ada perubahan data untuk refresh grafik
+                if (JSON.stringify(latestData[containerId]) !== JSON.stringify(chartData)) {
+                  latestData[containerId] = chartData; // Simpan data terbaru
 
-                // Add some padding to the range for better readability
-                let rangePadding = (maxVal - minVal) * 0.1;
-                let yAxisMin = minVal - rangePadding;
-                let yAxisMax = maxVal + rangePadding;
+                  // Hitung batas minimum dan maksimum Y-axis
+                  const values = chartData.map(item => item.value[1]).filter(val => val !== null);
+                  const minVal = values.length > 0 ? Math.min(...values) : 0;
+                  const maxVal = values.length > 0 ? Math.max(...values) : 10;
+                  const rangePadding = (maxVal - minVal) * 0.1;
+                  const yAxisMin = minVal - rangePadding;
+                  const yAxisMax = maxVal + rangePadding;
 
-                // Fill missing data with nulls to break the line
-                let filledData = fillMissingData(chartData, 1); // 1-minute interval
-
-                var option = {
-                  title: {
-                    text: titleText
-                  },
-                  tooltip: {
-                    trigger: 'axis',
-                    formatter: function (params) {
-                      params = params[0];
-                      let date = new Date(params.name);
-                      return (
-                        date.getHours().toString().padStart(2, '0') + ':' +
-                        date.getMinutes().toString().padStart(2, '0') + ':' +
-                        date.getSeconds().toString().padStart(2, '0') +
-                        ' : ' + (params.value[1] !== null ? params.value[1] + ' ' + unit : 'No Data')
-                      );
+                  // Konfigurasi ECharts
+                  const option = {
+                    title: { text: titleText },
+                    tooltip: {
+                      trigger: 'axis',
+                      formatter: function (params) {
+                        params = params[0];
+                        const date = new Date(params.name);
+                        return (
+                          date.getHours().toString().padStart(2, '0') + ':' +
+                          date.getMinutes().toString().padStart(2, '0') + ':' +
+                          date.getSeconds().toString().padStart(2, '0') +
+                          ' : ' + (params.value[1] !== null ? params.value[1] + ' ' + unit : 'No Data')
+                        );
+                      },
+                      axisPointer: { animation: false }
                     },
-                    axisPointer: {
-                      animation: false
-                    }
-                  },
-                  xAxis: {
-                    type: 'time',
-                    splitLine: {
-                      show: false
-                    }
-                  },
-                  yAxis: {
-                    type: 'value',
-                    boundaryGap: [0, '100%'],
-                    splitLine: {
-                      show: false
+                    xAxis: { type: 'time', splitLine: { show: false } },
+                    yAxis: {
+                      type: 'value',
+                      boundaryGap: [0, '100%'],
+                      splitLine: { show: false },
+                      name: yAxisName,
+                      min: yAxisMin,
+                      max: yAxisMax
                     },
-                    name: yAxisName,
-                    min: yAxisMin,
-                    max: yAxisMax
-                  },
+                    dataZoom: [
+                      { type: 'inside', start: 90, end: 100 },
+                      { start: 90, end: 100 }
+                    ],
+                    series: [
+                      {
+                        name: titleText,
+                        type: 'line',
+                        showSymbol: true,
+                        connectNulls: false,
+                        data: chartData
+                      }
+                    ]
+                  };
 
-                  dataZoom: [
-                    {
-                      type: 'inside',
-                      start: 90,
-                      end: 100
-                    },
-                    {
-                      start: 90,
-                      end: 100
-                    }
-                  ],
-
-                  series: [
-                    {
-                      name: titleText,
-                      type: 'line',
-                      showSymbol: true,
-                      connectNulls: false, // Don't connect null values
-                      data: filledData
-                    }
-                  ]
-                };
-
-                myChart.setOption(option);
+                  // Update grafik dengan data baru
+                  myChart.setOption(option);
+                }
               })
-              .catch(error => console.error('Error fetching data:', error));
-
-            window.addEventListener('resize', myChart.resize);
+              .catch(error => console.error('Error rendering chart:', error));
           }
 
-          // Render charts with dynamic y-axis range
-          renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz');
-          renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V');
-          renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V');
-          renderChart('containerV3', 'Voltage 3 Over Time', 'Voltage (V)', 'U3', 'V');
-          renderChart('containerVAvg', 'Avg Voltage Over Time', 'Voltage (V)', 'Uavg', 'V');
+          async function initializeFlatpickrAndCharts() {
+            const data = await fetchData();
+
+            // Mendapatkan tanggal hari ini dalam format "YYYY-MM-DD"
+            const todayDate = new Date().toISOString().split('T')[0];
+
+            // Jika data tersedia, gunakan tanggal terbaru dari data, jika tidak gunakan hari ini
+            const latestDate = data.length > 0
+              ? new Date(data[data.length - 1].updated_at).toISOString().split('T')[0]
+              : todayDate;
+
+            // Initialize Flatpickr dengan tanggal default
+            flatpickr('#datePicker', {
+              defaultDate: latestDate, // Set default date ke tanggal terbaru atau hari ini
+              dateFormat: 'Y-m-d', // Format untuk mencocokkan API
+              onChange: (selectedDates, dateStr) => {
+                syncCharts(dateStr); // Perbarui grafik saat tanggal berubah
+              }
+            });
+
+            // Render grafik dengan tanggal default
+            syncCharts(latestDate);
+
+            // Cek setiap 5 detik untuk perubahan data dan refresh grafik jika ada update
+            setInterval(() => {
+              const selectedDate = document.querySelector('#datePicker').value;
+              syncCharts(selectedDate); // Refresh grafik setiap interval
+            }, 5000);
+          }
+
+          function syncCharts(selectedDate) {
+            const chartInstances = {};
+            renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz', selectedDate, chartInstances);
+            renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V', selectedDate, chartInstances);
+            renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V', selectedDate, chartInstances);
+            renderChart('containerV3', 'Voltage 3 Over Time', 'Voltage (V)', 'U3', 'V', selectedDate, chartInstances);
+            renderChart('containerVAvg', 'Average Voltage Over Time', 'Voltage (V)', 'Uavg', 'V', selectedDate, chartInstances);
+          }
+
+          // Initialize everything
+          initializeFlatpickrAndCharts();
+
         </script>-->
 
-        <!--<script type="text/javascript">
-        // Helper function to add missing data points as null to break the line
-        function fillMissingData(data, intervalMinutes) {
-            const filledData = [];
-            const intervalMillis = intervalMinutes * 60 * 1000; // Convert minutes to milliseconds
 
-            for (let i = 0; i < data.length - 1; i++) {
-                filledData.push(data[i]);
-
-                const currentTime = new Date(data[i].name).getTime();
-                const nextTime = new Date(data[i + 1].name).getTime();
-
-                // If the gap between data points is greater than the interval, insert a null value
-                if (nextTime - currentTime > intervalMillis) {
-                    filledData.push({ name: data[i + 1].name, value: [data[i + 1].name, null] });
-                }
-            }
-
-            // Add the last data point
-            filledData.push(data[data.length - 1]);
-            return filledData;
-        }
-
-        function renderChart(containerId, titleText, yAxisName, dataKey, unit) {
-            var dom = document.getElementById(containerId);
-            var myChart = echarts.init(dom, null, {
-                renderer: 'canvas',
-                useDirtyRect: false
-            });
-
-            fetch('http://127.0.0.1:8000/api/v1/metering')
-                .then(response => response.json())
-                .then(data => {
-                    // Extract updated_at and specified dataKey values for the chart
-                    let chartData = data.map(item => ({
-                        name: item.updated_at,
-                        value: [item.updated_at, item[dataKey]]
-                    }));
-
-                    // Fill missing data with nulls to break the line
-                    let filledData = fillMissingData(chartData, 1); // 1-minute interval
-
-                    var option = {
-                        title: {
-                            text: titleText
-                        },
-                        tooltip: {
-                            trigger: 'axis',
-                            formatter: function (params) {
-                                params = params[0];
-                                let date = new Date(params.name);
-                                return (
-                                    date.getHours().toString().padStart(2, '0') + ':' +
-                                    date.getMinutes().toString().padStart(2, '0') + ':' +
-                                    date.getSeconds().toString().padStart(2, '0') +
-                                    ' : ' + (params.value[1] !== null ? params.value[1] + ' ' + unit : 'No Data')
-                                );
-                            },
-                            axisPointer: {
-                                animation: false
-                            }
-                        },
-                        xAxis: {
-                            type: 'time',
-                            splitLine: {
-                                show: false
-                            }
-                        },
-                        yAxis: {
-                            type: 'value',
-                            boundaryGap: [0, '100%'],
-                            splitLine: {
-                                show: false
-                            },
-                            name: yAxisName
-                        },
-
-                        dataZoom: [
-                            {
-                                type: 'inside',
-                                start: 0,
-                                end: 100
-                            },
-                            {
-                                start: 0,
-                                end: 100
-                            }
-                        ],
-
-                        series: [
-                            {
-                                name: titleText,
-                                type: 'line',
-                                showSymbol: true,
-                                connectNulls: false, // Don't connect null values
-                                data: filledData
-                            }
-                        ]
-                    };
-
-                    myChart.setOption(option);
-                })
-                .catch(error => console.error('Error fetching data:', error));
-
-            window.addEventListener('resize', myChart.resize);
-        }
-
-        // Render Frequency and U1 charts
-        renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz');
-        renderChart('containerV1', 'U1 Over Time', 'Voltage (V)', 'U1', 'V');
-        renderChart('containerV2', 'U2 Over Time', 'Voltage (V)', 'U2', 'V');
-        // renderChart('U3', 'U3 Over Time', 'Voltage (V)', 'U3', 'V');
-        // renderChart('U12', 'U12 Over Time', 'Voltage (V)', 'U12', 'V');
-        // renderChart('U23', 'U23 Over Time', 'Voltage (V)', 'U23', 'V');
-        // renderChart('U31', 'U31 Over Time', 'Voltage (V)', 'U31', 'V');
-    </script> -->
-
-
-        <!-- 
         <script type="text/javascript">
-          function renderChart(containerId, titleText, yAxisName, seriesName, unit, data) {
-            var dom = document.getElementById(containerId);
-            var myChart = echarts.init(dom, null, {
-              renderer: 'canvas',
-              useDirtyRect: false
-            });
-            //var app = {};
+          let latestData = {}; // Menyimpan data terakhir per grafik agar bisa membandingkan perubahan
 
-            var option = {
-              title: {
-                text: titleText
-              },
-              tooltip: {
-                trigger: 'axis',
-                formatter: function (params) {
-                  params = params[0];
-                  var date = new Date(params.name);
-                  return (
-                    date.getHours().toString().padStart(2, '0') + ':' +
-                    date.getMinutes().toString().padStart(2, '0') + ':' +
-                    date.getSeconds().toString().padStart(2, '0') +
-                    ' : ' + params.value[1] + unit
-                  );
-                },
-                axisPointer: {
-                  animation: false
-                }
-              },
-              xAxis: {
-                type: 'time',
-                splitLine: { show: false }
-              },
-              yAxis: {
-                type: 'value',
-                boundaryGap: [0, '100%'],
-                splitLine: { show: false },
-                name: yAxisName
-              },
-              dataZoom: [
-                { type: 'inside', start: 0, end: 100 },
-                { start: 0, end: 100 }
-              ],
-              series: [
-                {
-                  name: seriesName,
-                  type: 'line',
-                  showSymbol: true,
-                  data: data
-                }
-              ]
-            };
-
-            if (option && typeof option === 'object') {
-              myChart.setOption(option);
+          async function fetchData() {
+            try {
+              const response = await fetch('http://127.0.0.1:8000/api/v1/metering');
+              return await response.json();
+            } catch (error) {
+              console.error('Error fetching data:', error);
+              return [];
             }
-
-            window.addEventListener('resize', myChart.resize);
           }
 
-          // Data untuk setiap grafik
-          let dataFrequency = [
-            { name: '2024/11/13 00:01:00', value: ['2024/11/13 00:01:00', 50] },
-            { name: '2024/11/13 00:02:00', value: ['2024/11/13 00:02:00', 52] },
-            { name: '2024/11/13 00:03:00', value: ['2024/11/13 00:03:00', 48] },
-            { name: '2024/11/13 00:04:00', value: ['2024/11/13 00:04:00', 49] },
-            { name: '2024/11/13 00:05:00', value: ['2024/11/13 00:05:00', 51] }
-          ];
-          let dataVoltage1 = [
-            { name: '2024/11/13 00:01:00', value: ['2024/11/13 00:01:00', 150] },
-            { name: '2024/11/13 00:02:00', value: ['2024/11/13 00:02:00', 170] },
-            { name: '2024/11/13 00:03:00', value: ['2024/11/13 00:03:00', 160] },
-            { name: '2024/11/13 00:04:00', value: ['2024/11/13 00:04:00', 180] },
-            { name: '2024/11/13 00:05:00', value: ['2024/11/13 00:05:00', 175] }
-          ];
-          let dataVoltage2 = [
-            { name: '2024/11/13 00:01:00', value: ['2024/11/13 00:01:00', 220] },
-            { name: '2024/11/13 00:02:00', value: ['2024/11/13 00:02:00', 225] },
-            { name: '2024/11/13 00:03:00', value: ['2024/11/13 00:03:00', 210] },
-            { name: '2024/11/13 00:04:00', value: ['2024/11/13 00:04:00', 230] },
-            { name: '2024/11/13 00:05:00', value: ['2024/11/13 00:05:00', 240] }
-          ];
+          function renderChart(containerId, titleText, yAxisName, dataKey, unit, selectedDate, chartInstances) {
+            const dom = document.getElementById(containerId);
+            if (!chartInstances[containerId]) {
+              chartInstances[containerId] = echarts.init(dom, null, {
+                renderer: 'canvas',
+                useDirtyRect: false
+              });
+            }
+            const myChart = chartInstances[containerId];
 
-          // Render masing-masing grafik
-          renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'Frequency', ' Hz', dataFrequency);
-          renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'Voltage 1', ' V', dataVoltage1);
-          renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'Voltage 2', ' V', dataVoltage2);
-        </script> -->
+            fetchData()
+              .then(data => {
+                // Filter data berdasarkan tanggal yang dipilih
+                const filteredData = data.filter(item => {
+                  const itemDate = new Date(item.updated_at).toISOString().split('T')[0];
+                  return itemDate === selectedDate;
+                });
+
+                // Format data untuk ECharts
+                const chartData = filteredData.map(item => ({
+                  name: item.updated_at,
+                  value: [item.updated_at, item[dataKey]]
+                }));
+
+                // Cek jika ada perubahan data untuk refresh grafik
+                if (JSON.stringify(latestData[containerId]) !== JSON.stringify(chartData)) {
+                  latestData[containerId] = chartData; // Simpan data terbaru
+
+                  // Hitung batas minimum dan maksimum Y-axis
+                  const values = chartData.map(item => item.value[1]).filter(val => val !== null);
+                  const minVal = values.length > 0 ? Math.min(...values) : 0;
+                  const maxVal = values.length > 0 ? Math.max(...values) : 10;
+                  const rangePadding = (maxVal - minVal) * 0.1;
+                  const yAxisMin = minVal - rangePadding;
+                  const yAxisMax = maxVal + rangePadding;
+
+                  // Tentukan range waktu (24 jam) berdasarkan tanggal yang dipilih
+                  const dayStart = new Date(`${selectedDate}T00:00:00`).getTime();
+                  const dayEnd = new Date(`${selectedDate}T23:59:59`).getTime();
+
+                  // Konfigurasi ECharts
+                  const option = {
+                    title: { text: titleText },
+                    tooltip: {
+                      trigger: 'axis',
+                      formatter: function (params) {
+                        params = params[0];
+                        const date = new Date(params.name);
+                        return (
+                          date.getHours().toString().padStart(2, '0') + ':' +
+                          date.getMinutes().toString().padStart(2, '0') + ':' +
+                          date.getSeconds().toString().padStart(2, '0') +
+                          ' : ' + (params.value[1] !== null ? params.value[1] + ' ' + unit : 'No Data')
+                        );
+                      },
+                      axisPointer: { animation: false }
+                    },
+                    xAxis: {
+                      type: 'time',
+                      splitLine: { show: false },
+                      min: dayStart, // Mulai dari pukul 00:00:00
+                      max: dayEnd,   // Sampai pukul 23:59:59
+                    },
+                    yAxis: {
+                      type: 'value',
+                      boundaryGap: [0, '100%'],
+                      splitLine: { show: false },
+                      name: yAxisName,
+                      min: yAxisMin,
+                      max: yAxisMax
+                    },
+                    dataZoom: [
+                      { type: 'inside', start: 0, end: 100 },
+                      { start: 0, end: 100 }
+                    ],
+                    series: [
+                      {
+                        name: titleText,
+                        type: 'line',
+                        showSymbol: true,
+                        connectNulls: false,
+                        data: chartData
+                      }
+                    ]
+                  };
+
+                  // Update grafik dengan data baru
+                  myChart.setOption(option);
+                }
+              })
+              .catch(error => console.error('Error rendering chart:', error));
+          }
+
+          async function initializeFlatpickrAndCharts() {
+            const data = await fetchData();
+
+            // Mendapatkan tanggal hari ini dalam format "YYYY-MM-DD"
+            const todayDate = new Date().toISOString().split('T')[0];
+
+            // Jika data tersedia, gunakan tanggal terbaru dari data, jika tidak gunakan hari ini
+            const latestDate = data.length > 0
+              ? new Date(data[data.length - 1].updated_at).toISOString().split('T')[0]
+              : todayDate;
+
+            // Initialize Flatpickr dengan tanggal default
+            flatpickr('#datePicker', {
+              defaultDate: latestDate, // Set default date ke tanggal terbaru atau hari ini
+              dateFormat: 'Y-m-d', // Format untuk mencocokkan API
+              onChange: (selectedDates, dateStr) => {
+                syncCharts(dateStr); // Perbarui grafik saat tanggal berubah
+              }
+            });
+
+            // Render grafik dengan tanggal default
+            syncCharts(latestDate);
+
+            // Cek setiap 5 detik untuk perubahan data dan refresh grafik jika ada update
+            setInterval(() => {
+              const selectedDate = document.querySelector('#datePicker').value;
+              syncCharts(selectedDate); // Refresh grafik setiap interval
+            }, 5000);
+          }
+
+          function syncCharts(selectedDate) {
+            const chartInstances = {};
+            renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz', selectedDate, chartInstances);
+            renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V', selectedDate, chartInstances);
+            renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V', selectedDate, chartInstances);
+            renderChart('containerV3', 'Voltage 3 Over Time', 'Voltage (V)', 'U3', 'V', selectedDate, chartInstances);
+            renderChart('containerVAvg', 'Average Voltage Over Time', 'Voltage (V)', 'Uavg', 'V', selectedDate, chartInstances);
+          }
+
+          // Initialize everything
+          initializeFlatpickrAndCharts();
+
+        </script>
       </div>
     </div>
 
@@ -693,7 +659,7 @@
     let previousVoltageAvg = null; // Store previous voltage
     let previousVoltageChangeAvg = null; // Store previous voltage change percentage
     let previousTotalEnergy = null; // Store previous total energy
-    let previousTotalEnergyChange = null; // Store previous total energy change percentage
+    let lastFetchedEnergy = null; // Store previous total energy change percentage
 
     // Function to fetch and display the last 2 data points' frequency and voltage values
     function fetchAndDisplayLastTwoData() {
@@ -770,11 +736,13 @@
             voltageChangeAvg = previousVoltageChangeAvg || 0; // If no change, keep the last change
           }
 
-          let TotEChange = 0;
-          if (previousTotalEnergy !== null && currentTotalEnergy !== previousTotalEnergy) {
-            TotEChange = ((currentTotalEnergy - previousTotalEnergy) / previousTotalEnergy);
-          } else {
-            TotEChange = previousTotalEnergyChange || 0; // If no change, keep the last change
+          // Hanya lakukan perubahan jika data baru berbeda dari yang terakhir diperiksa
+          if (lastFetchedEnergy === currentTotalEnergy) {
+          }
+
+          let TotEDifference = 0;
+          if (previousTotalEnergy !== null) {
+            TotEDifference = currentTotalEnergy - previousTotalEnergy;
           }
 
           // Update the DOM with the frequency and voltage values
@@ -791,7 +759,7 @@
           v2ChangeElement.textContent = `${voltageChange2.toFixed(2)}%`;
           v3ChangeElement.textContent = `${voltageChange3.toFixed(2)}%`;
           vAvgChangeElement.textContent = `${voltageChangeAvg.toFixed(2)}%`;
-          TotEChangeElement.textContent = `${TotEChange.toFixed(2)}`;
+          TotEChangeElement.textContent = `${TotEDifference.toFixed(2)} kWh`;
 
           // Store the current frequency, voltage, and changes as previous values for the next update
           previousFrequency = currentFrequency;
@@ -805,7 +773,7 @@
           previousVoltageAvg = currentVoltageAvg;
           previousVoltageChangeAvg = voltageChangeAvg;
           previousTotalEnergy = currentTotalEnergy;
-          previousTotalEnergyChange = TotEChange;
+          lastFetchedEnergy = currentTotalEnergy;
         })
         .catch(error => {
           console.error('Error fetching data:', error);
@@ -819,99 +787,82 @@
     setInterval(fetchAndDisplayLastTwoData, 3000);
   </script>
 
-  <!-- <script type="text/javascript">
-    const apiUrl = 'http://127.0.0.1:8000/api/v1/metering'; // Replace with your API URL
+  <div class="card-body">
+    <div id="frequency-gauge" style="width: 400px; height: 300px;"></div>
+  </div>
 
-    // Function to fetch and display the last 2 data points' frequency and voltage values
+  <script>
+    // Inisialisasi chart menggunakan ECharts
+    const chartDom = document.getElementById('frequency-gauge');
+    const myChart = echarts.init(chartDom);
+
+    // Opsi awal untuk gauge chart
+    const option = {
+      tooltip: {
+        formatter: '{a} <br/>{b} : {c} Hz'
+      },
+      series: [
+        {
+          name: 'Frequency',
+          type: 'gauge',
+          progress: {
+            show: true
+          },
+          detail: {
+            valueAnimation: true,
+            formatter: '{value} Hz' // Menampilkan satuan Hz
+          },
+          data: [
+            {
+              value: 50.0, // Nilai awal frekuensi
+              name: 'FREQUENCY'
+            }
+          ]
+        }
+      ]
+    };
+
+    // Terapkan opsi awal ke chart
+    myChart.setOption(option);
+
+    // Fungsi untuk mengambil dua data terakhir dan menampilkan frekuensinya
     function fetchAndDisplayLastTwoData() {
-        fetch(apiUrl)
-            .then(response => response.json())
-            .then(data => {
-                console.log('API Response:', data); // Debug: Log the data
+      const apiUrl = 'http://127.0.0.1:8000/api/v1/metering'; // URL API
 
-                // Check if there are at least two data points
-                if (data.length < 2) {
-                    console.log('Not enough data to fetch the last 2 entries');
-                    return;
-                }
-
-                // Get the last 2 data entries
-                const lastTwoData = data.slice(-2);
-
-                // Get frequency (F) and voltage (U1) from the last two data entries
-                const frequency = lastTwoData[0].F; // Frequency of the second-to-last entry
-                const voltage = lastTwoData[0].U1; // Voltage of the second-to-last entr
-
-                // Get HTML elements for displaying values
-                const fValueElement = document.getElementById('f-value');
-                const v1ValueElement = document.getElementById('v1-value');
-
-                // Update the DOM with the frequency and voltage values from the last two entries
-                fValueElement.textContent = `${frequency} Hz`;
-                v1ValueElement.textContent =` ${voltage} V`;
-
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-            });
-    }
-
-    // Fetch and display the data when the page loads
-    document.addEventListener('DOMContentLoaded', fetchAndDisplayLastTwoData);
-</script>-->
-
-  <!--<script type="text/javascript">
-    const apiUrl = 'http://127.0.0.1:8000/api/v1/metering'; // Replace with your API URL
-
-    let previousFValue = null; // Store the previous frequency value
-    let updateTimeout = null; // Timeout reference for synchronized updates
-
-    function updateFreqDisplay() {
-      fetch(apiUrl) // Replace with your API URL
+      fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
-          
-          const latestData = data[data.length - 1];
+          console.log('API Response:', data); // Debug: Log the data
 
-          // Get the current frequency value
-          const currentFValue = latestData.F;
-          const fValueElement = document.getElementById('f-value');
-          const fChangeElement = document.getElementById('f-change');
-
-          // Calculate the percentage change for frequency
-          let fChange = 0;
-          if (previousFValue !== null) {
-            // Calculate percentage change only if previous value exists
-            fChange = ((currentFValue - previousFValue) / previousFValue)*100;
+          // Pastikan data memiliki setidaknya dua entri
+          if (data.length < 2) {
+            console.log('Not enough data to fetch the last 2 entries');
+            return;
           }
 
-          // Update the frequency value and percentage change
-          fValueElement.textContent = `${currentFValue} Hz`;
-          fChangeElement.textContent = `(${fChange.toFixed(2)}%)`;
+          // Ambil dua data terakhir
+          const lastTwoData = data.slice(-2);
 
-          // Clear any existing timeout to prevent overlapping updates
-          if (updateTimeout) {
-            clearTimeout(updateTimeout);
-          }
+          // Ambil nilai frekuensi dari dua data terakhir
+          const frequency = parseFloat(lastTwoData[lastTwoData.length - 1].F) || 0.0; // Data terakhir
 
-          // Set a timeout to clear both value and percentage change after 3 seconds
-          updateTimeout = setTimeout(() => {
-            fValueElement.textContent = ''; // Clear the frequency value
-            fChangeElement.textContent = ''; // Clear the percentage change
-          }, 3000); // Timeout duration in milliseconds
+          console.log('Last Frequency:', frequency); // Debug: Log the last frequency
 
-          // Store the current frequency value as the previous value for the next update
-          previousFValue = currentFValue;
+          // Update nilai pada chart dengan data frekuensi terbaru
+          option.series[0].data[0].value = frequency;
+          myChart.setOption(option); // Perbarui chart dengan nilai baru
         })
         .catch(error => {
-          console.error('Error fetching data:', error);
+          console.error('Error fetching frequency data:', error);
         });
     }
 
-    // Update every 3 seconds to match the timeout duration
-    setInterval(updateFreqDisplay, 3000);
-  </script> -->
+    // Panggilan pertama untuk mengambil data
+    fetchAndDisplayLastTwoData();
 
+    // Memanggil fungsi fetch setiap 5 detik untuk memperbarui data
+    setInterval(fetchAndDisplayLastTwoData, 5000);
+  </script>
 
   <div class="row mb-12 g-6">
     <div class="col-12 col-xl-12 mb-4">
