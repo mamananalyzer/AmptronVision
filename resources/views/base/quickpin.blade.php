@@ -444,6 +444,35 @@
                       min: yAxisMin,
                       max: yAxisMax
                     },
+
+                    toolbox: {
+                      feature: {
+                        saveAsImage: {
+                          title: 'Save as Image'
+                        },
+                        dataView: {
+                          title: 'View Data',
+                          readOnly: false
+                        },
+                        restore: {
+                          title: 'Reset'
+                        },
+                        magicType: {
+                          type: ['line', 'bar'],
+                          title: {
+                            line: 'Change Line',
+                            bar: 'Change Bar'
+                          }
+                        },
+                        dataZoom: {
+                          title: {
+                            zoom: 'Zoom',
+                            back: 'Reset Zoom'
+                          }
+                        }
+                      }
+                    },
+
                     dataZoom: [
                       { type: 'inside', start: 0, end: 100 },
                       { start: 0, end: 100 }
@@ -788,10 +817,124 @@
   </script>
 
   <div class="card-body">
-    <div id="frequency-gauge" style="width: 400px; height: 300px;"></div>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+      <div id="frequency-gauge" style="width: 300px; height: 300px;"></div>
+      <div id="voltage1-group" style="display: flex; align-items: center;">
+        <div id="voltage1-gauge" style="width: 300px; height: 300px;"></div>
+        <div id="average-voltage-gauge" style="width: 300px; height: 300px;"></div>
+      </div>
+      <div id="voltage2-gauge" style="width: 300px; height: 300px;"></div>
+      <div id="voltage3-gauge" style="width: 300px; height: 300px;"></div>
+      <div id="total-energy-gauge" style="width: 300px; height: 300px;"></div>
+    </div>
   </div>
 
   <script>
+    // Inisialisasi ECharts untuk masing-masing gauge
+    const charts = {
+      frequency: echarts.init(document.getElementById('frequency-gauge')),
+      voltage1: echarts.init(document.getElementById('voltage1-gauge')),
+      voltage2: echarts.init(document.getElementById('voltage2-gauge')),
+      voltage3: echarts.init(document.getElementById('voltage3-gauge')),
+      averageVoltage: echarts.init(document.getElementById('average-voltage-gauge')),
+      totalEnergy: echarts.init(document.getElementById('total-energy-gauge')),
+    };
+
+    // Template untuk opsi gauge chart
+    function createGaugeOption(title, min, max, value, unit) {
+      return {
+        title: {
+          text: title,
+          left: 'center',
+          top: '3%',
+          textStyle: {
+            fontSize: 16,
+            fontWeight: 'bold'
+          }
+        },
+        tooltip: {
+          formatter: `{b} : {c} ${unit}`
+        },
+        series: [
+          {
+            name: title,
+            type: 'gauge',
+            min: min,
+            max: max,
+            splitNumber: 5,
+            progress: {
+              show: true,
+              width: 15
+            },
+            axisLine: {
+              lineStyle: {
+                width: 15,
+                color: [
+                  [0.3, '#FF4500'],
+                  [0.7, '#FFD700'],
+                  [1, '#32CD32']
+                ]
+              }
+            },
+            detail: {
+              valueAnimation: true,
+              formatter: `{value} ${unit}`,
+              fontSize: 14
+            },
+            data: [{ value: value, name: title }]
+          }
+        ]
+      };
+    }
+
+    // Fungsi untuk mengambil data dari API dan memperbarui semua gauge
+    function fetchAndUpdateGauges() {
+      const apiUrl = 'http://127.0.0.1:8000/api/v1/metering'; // URL API
+
+      fetch(apiUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('API Response:', data); // Debug log
+
+          // Pastikan data tidak kosong
+          if (data.length === 0) {
+            console.warn('No data received from API');
+            return;
+          }
+
+          // Ambil data terakhir
+          const lastData = data[data.length - 1];
+
+          // Ambil nilai parameter
+          const frequency = parseFloat(lastData.F); // Frekuensi
+          const voltage1 = parseFloat(lastData.U1); // Voltase 1
+          const voltage2 = parseFloat(lastData.U2); // Voltase 2
+          const voltage3 = parseFloat(lastData.U3); // Voltase 3
+          const averageVoltage = parseFloat(lastData.Uavg); // Rata-rata voltase
+          const totalEnergy = parseFloat(lastData.Ep_sum); // Total energi
+
+          // Perbarui masing-masing chart dengan data terbaru
+          charts.frequency.setOption(createGaugeOption('Frequency', 45, 55, frequency, 'Hz'));
+          charts.voltage1.setOption(createGaugeOption('Voltage 1', 0, 250, voltage1, 'V'));
+          charts.voltage2.setOption(createGaugeOption('Voltage 2', 0, 250, voltage2, 'V'));
+          charts.voltage3.setOption(createGaugeOption('Voltage 3', 0, 250, voltage3, 'V'));
+          charts.averageVoltage.setOption(createGaugeOption('Avg Voltage', 0, 250, averageVoltage, 'V'));
+          charts.totalEnergy.setOption(createGaugeOption('Total Energy', 0, 5000, totalEnergy, 'kWh'));
+        })
+        .catch((error) => {
+          console.error('Error fetching gauge data:', error);
+        });
+    }
+
+    // Panggilan pertama untuk mengambil data
+    fetchAndUpdateGauges();
+
+    // Perbarui data setiap 5 detik
+    setInterval(fetchAndUpdateGauges, 5000);
+  </script>
+
+
+  <!--<script>
     // Inisialisasi chart menggunakan ECharts
     const chartDom = document.getElementById('frequency-gauge');
     const myChart = echarts.init(chartDom);
@@ -805,17 +948,36 @@
         {
           name: 'Frequency',
           type: 'gauge',
+          min: 45, // Nilai minimum tetap
+          max: 55, // Nilai maksimum tetap
+          splitNumber: 5, // Jumlah pembagian (10 tick untuk 45-55)
           progress: {
-            show: true
+            show: true,
+            width: 10 // Lebar garis progress
+          },
+          axisLine: {
+            lineStyle: {
+              width: 10,
+              color: [
+                [0.4, '#FF4500'], // Warna merah untuk bagian bawah rentang
+                [0.7, '#FFD700'], // Warna kuning untuk rentang menengah
+                [1, '#32CD32'] // Warna hijau untuk rentang atas
+              ]
+            }
+          },
+          axisLabel: {
+            formatter: '{value} Hz' // Menambahkan satuan pada label
           },
           detail: {
             valueAnimation: true,
-            formatter: '{value} Hz' // Menampilkan satuan Hz
+            formatter: '{value} Hz', // Menampilkan satuan pada nilai
+            fontSize: 16
           },
           data: [
             {
-              value: 50.0, // Nilai awal frekuensi
-              name: 'FREQUENCY'
+              value: 50, // Nilai awal frekuensi
+              name: 'Frequency',
+              fontSize: 16
             }
           ]
         }
@@ -825,8 +987,8 @@
     // Terapkan opsi awal ke chart
     myChart.setOption(option);
 
-    // Fungsi untuk mengambil dua data terakhir dan menampilkan frekuensinya
-    function fetchAndDisplayLastTwoData() {
+    // Fungsi untuk mengambil data dan memperbarui chart
+    function fetchAndDisplayFrequencyData() {
       const apiUrl = 'http://127.0.0.1:8000/api/v1/metering'; // URL API
 
       fetch(apiUrl)
@@ -834,23 +996,24 @@
         .then(data => {
           console.log('API Response:', data); // Debug: Log the data
 
-          // Pastikan data memiliki setidaknya dua entri
-          if (data.length < 2) {
-            console.log('Not enough data to fetch the last 2 entries');
+          // Pastikan data memiliki entri
+          if (data.length === 0) {
+            console.log('No data received from API');
             return;
           }
 
-          // Ambil dua data terakhir
-          const lastTwoData = data.slice(-2);
+          // Ambil nilai frekuensi terakhir
+          const lastFrequency = parseFloat(data[data.length - 1].F) || 45; // Default ke 45 jika gagal
 
-          // Ambil nilai frekuensi dari dua data terakhir
-          const frequency = parseFloat(lastTwoData[lastTwoData.length - 1].F) || 0.0; // Data terakhir
+          // Validasi nilai frekuensi dalam rentang 45-55
+          if (lastFrequency < 45 || lastFrequency > 55) {
+            console.warn('Frequency out of range:', lastFrequency);
+            return;
+          }
 
-          console.log('Last Frequency:', frequency); // Debug: Log the last frequency
-
-          // Update nilai pada chart dengan data frekuensi terbaru
-          option.series[0].data[0].value = frequency;
-          myChart.setOption(option); // Perbarui chart dengan nilai baru
+          // Perbarui nilai pada chart
+          option.series[0].data[0].value = lastFrequency;
+          myChart.setOption(option); // Terapkan pembaruan ke chart
         })
         .catch(error => {
           console.error('Error fetching frequency data:', error);
@@ -858,11 +1021,11 @@
     }
 
     // Panggilan pertama untuk mengambil data
-    fetchAndDisplayLastTwoData();
+    fetchAndDisplayFrequencyData();
 
     // Memanggil fungsi fetch setiap 5 detik untuk memperbarui data
-    setInterval(fetchAndDisplayLastTwoData, 5000);
-  </script>
+    setInterval(fetchAndDisplayFrequencyData, 5000);
+  </script>-->
 
   <div class="row mb-12 g-6">
     <div class="col-12 col-xl-12 mb-4">
