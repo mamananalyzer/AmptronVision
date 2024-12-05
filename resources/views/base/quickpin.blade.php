@@ -19,14 +19,44 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 @endsection
 
+<style>
+  /* Styling for the period buttons inside the calendar */
+  .flatpickr-calendar .period-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+    margin: 10px;
+  }
+
+  .flatpickr-calendar .period-buttons button {
+    padding: 5px 10px;
+    cursor: pointer;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+  }
+
+  .flatpickr-calendar .period-buttons button:hover {
+    background-color: #0056b3;
+  }
+
+  #chartContainer>div {
+    margin-top: 20px;
+  }
+</style>
+
 @section('content')
 <div class="flex-grow-1 container-p-y container-fluid">
   <div class="row mb-12 g-6">
     <div class="col-md-6 col-lg-6">
-      <div style="margin-bottom: 20px;">
-        <label for="datePicker" style="font-weight: bold; margin-right: 10px;">Select Date :</label>
-        <input id="datePicker" type="text" placeholder="Pick a date" />
+      <div style="margin-bottom: 20px" id="calendar-container">
+        <span id="calendar-label">Select a Date : </span>
+        <input type="text" id="datePicker" />
       </div>
+
+
       <!-- <div class="mb-4">
         <label for="datePicker">Select Date :</label>
         <input type="date" id="datePicker" />
@@ -360,8 +390,10 @@
         </script>-->
 
 
-        <script type="text/javascript">
-          let latestData = {}; // Menyimpan data terakhir per grafik agar bisa membandingkan perubahan
+        <script>
+          let selectedPeriod = 'today'; // Default ke hari ini
+          const latestData = {};
+          const chartInstances = {};
 
           async function fetchData() {
             try {
@@ -373,7 +405,7 @@
             }
           }
 
-          function renderChart(containerId, titleText, yAxisName, dataKey, unit, selectedDate, chartInstances) {
+          function renderChart(containerId, titleText, yAxisName, dataKey, unit, startDate, endDate) {
             const dom = document.getElementById(containerId);
             if (!chartInstances[containerId]) {
               chartInstances[containerId] = echarts.init(dom, null, {
@@ -385,23 +417,19 @@
 
             fetchData()
               .then(data => {
-                // Filter data berdasarkan tanggal yang dipilih
                 const filteredData = data.filter(item => {
-                  const itemDate = new Date(item.updated_at).toISOString().split('T')[0];
-                  return itemDate === selectedDate;
+                  const itemTime = new Date(item.updated_at).getTime();
+                  return itemTime >= startDate && itemTime <= endDate;
                 });
 
-                // Format data untuk ECharts
                 const chartData = filteredData.map(item => ({
                   name: item.updated_at,
                   value: [item.updated_at, item[dataKey]]
                 }));
 
-                // Cek jika ada perubahan data untuk refresh grafik
                 if (JSON.stringify(latestData[containerId]) !== JSON.stringify(chartData)) {
-                  latestData[containerId] = chartData; // Simpan data terbaru
+                  latestData[containerId] = chartData;
 
-                  // Hitung batas minimum dan maksimum Y-axis
                   const values = chartData.map(item => item.value[1]).filter(val => val !== null);
                   const minVal = values.length > 0 ? Math.min(...values) : 0;
                   const maxVal = values.length > 0 ? Math.max(...values) : 10;
@@ -409,11 +437,6 @@
                   const yAxisMin = minVal - rangePadding;
                   const yAxisMax = maxVal + rangePadding;
 
-                  // Tentukan range waktu (24 jam) berdasarkan tanggal yang dipilih
-                  const dayStart = new Date(`${selectedDate}T00:00:00`).getTime();
-                  const dayEnd = new Date(`${selectedDate}T23:59:59`).getTime();
-
-                  // Konfigurasi ECharts
                   const option = {
                     title: { text: titleText },
                     tooltip: {
@@ -422,122 +445,162 @@
                         params = params[0];
                         const date = new Date(params.name);
                         return (
-                          date.getHours().toString().padStart(2, '0') + ':' +
-                          date.getMinutes().toString().padStart(2, '0') + ':' +
-                          date.getSeconds().toString().padStart(2, '0') +
-                          ' : ' + (params.value[1] !== null ? params.value[1] + ' ' + unit : 'No Data')
+                          `${date.toLocaleString()} : ` +
+                          (params.value[1] !== null ? params.value[1] + ' ' + unit : 'No Data')
                         );
-                      },
-                      axisPointer: { animation: false }
+                      }
                     },
                     xAxis: {
                       type: 'time',
-                      splitLine: { show: false },
-                      min: dayStart, // Mulai dari pukul 00:00:00
-                      max: dayEnd,   // Sampai pukul 23:59:59
+                      min: startDate,
+                      max: endDate
                     },
                     yAxis: {
                       type: 'value',
-                      boundaryGap: [0, '100%'],
-                      splitLine: { show: false },
                       name: yAxisName,
                       min: yAxisMin,
                       max: yAxisMax
                     },
-
-                    toolbox: {
-                      feature: {
-                        saveAsImage: {
-                          title: 'Save as Image'
-                        },
-                        dataView: {
-                          title: 'View Data',
-                          readOnly: false
-                        },
-                        restore: {
-                          title: 'Reset'
-                        },
-                        magicType: {
-                          type: ['line', 'bar'],
-                          title: {
-                            line: 'Change Line',
-                            bar: 'Change Bar'
-                          }
-                        },
-                        dataZoom: {
-                          title: {
-                            zoom: 'Zoom',
-                            back: 'Reset Zoom'
-                          }
-                        }
-                      }
-                    },
-
-                    dataZoom: [
-                      { type: 'inside', start: 0, end: 100 },
-                      { start: 0, end: 100 }
-                    ],
                     series: [
                       {
                         name: titleText,
                         type: 'line',
                         showSymbol: true,
-                        connectNulls: false,
                         data: chartData
                       }
-                    ]
+                    ],
+                    dataZoom: [
+                      {
+                        type: 'inside',  // Zoom menggunakan mouse scroll
+                        start: 0,        // Persentase awal zoom
+                        end: 100         // Persentase akhir zoom
+                      },
+                      {
+                        type: 'slider', // Slider zoom di bawah grafik
+                        start: 0,
+                        end: 100,
+                        bottom: '10%'   // Menempatkan slider sedikit lebih rendah
+                      }
+                    ],
+                    toolbox: {
+                      show: true,
+                      orient: 'horizontal', // Menyusun toolbox secara vertikal
+                      right: '10%',       // Menempatkan toolbox di sisi kanan
+                      // top: 'center',      // Posisi toolbox di tengah vertikal
+                      feature: {
+                        dataZoom: {
+                          show: true,
+                          title: {
+                            zoom: 'Zoom',
+                            back: 'Reset Zoom'
+                          }
+                        },
+                        restore: {
+                          show: true,
+                          title: 'Reset'
+                        },
+                        saveAsImage: {
+                          show: true,
+                          title: 'Simpan Gambar'
+                        }
+                      }
+                    }
                   };
 
-                  // Update grafik dengan data baru
                   myChart.setOption(option);
                 }
               })
               .catch(error => console.error('Error rendering chart:', error));
           }
 
+          function initializeCharts(startDate, endDate) {
+            renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz', startDate, endDate);
+            renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V', startDate, endDate);
+            renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V', startDate, endDate);
+            renderChart('containerV3', 'Voltage 3 Over Time', 'Voltage (V)', 'U3', 'V', startDate, endDate);
+            renderChart('containerVAvg', 'Average Voltage Over Time', 'Voltage (V)', 'Uavg', 'V', startDate, endDate);
+          }
+
+          function calculateDateRange(period, baseDate) {
+            const endDate = baseDate.getTime();
+            let startDate;
+
+            switch (period) {
+              case 'yesterday': // Kemarin
+                startDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() - 1).getTime();
+                break;
+              case 'today': // Hari ini
+                startDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate()).getTime();
+                break;
+              case '3d': // 3 Hari terakhir
+                startDate = endDate - 3 * 24 * 60 * 60 * 1000;
+                break;
+              case '1w': // 1 Minggu terakhir
+                startDate = endDate - 7 * 24 * 60 * 60 * 1000;
+                break;
+              case '1m': // 1 Bulan terakhir
+                startDate = new Date(baseDate.getFullYear(), baseDate.getMonth() - 1, baseDate.getDate()).getTime();
+                break;
+              default:
+                startDate = endDate;
+            }
+
+            return { startDate, endDate };
+          }
+
           async function initializeFlatpickrAndCharts() {
             const data = await fetchData();
 
-            // Mendapatkan tanggal hari ini dalam format "YYYY-MM-DD"
-            const todayDate = new Date().toISOString().split('T')[0];
+            const todayDate = new Date();
+            const { startDate, endDate } = calculateDateRange('today', todayDate); // Default ke hari ini
+            initializeCharts(startDate, endDate);
 
-            // Jika data tersedia, gunakan tanggal terbaru dari data, jika tidak gunakan hari ini
-            const latestDate = data.length > 0
-              ? new Date(data[data.length - 1].updated_at).toISOString().split('T')[0]
-              : todayDate;
-
-            // Initialize Flatpickr dengan tanggal default
             flatpickr('#datePicker', {
-              defaultDate: latestDate, // Set default date ke tanggal terbaru atau hari ini
-              dateFormat: 'Y-m-d', // Format untuk mencocokkan API
-              onChange: (selectedDates, dateStr) => {
-                syncCharts(dateStr); // Perbarui grafik saat tanggal berubah
+              defaultDate: new Date(), // Default date ke hari ini
+              dateFormat: 'Y-m-d',
+              onChange: (selectedDates, dateStr, instance) => {
+                const baseDate = new Date(selectedDates[0] || new Date());
+                // Ketika pengguna memilih tanggal di kalender, tampilkan data untuk tanggal tersebut
+                const startDate = baseDate.getTime();
+                const endDate = startDate + 24 * 60 * 60 * 1000 - 1; // Satu hari penuh
+                initializeCharts(startDate, endDate); // Update grafik berdasarkan tanggal yang dipilih
+              },
+              onOpen: (selectedDates, dateStr, instance) => {
+                const calendar = instance.calendarContainer;
+                if (!calendar.querySelector('.period-buttons')) {
+                  const periodButtons = document.createElement('div');
+                  periodButtons.className = 'period-buttons';
+
+                  const periods = [
+                    { label: 'Kemarin', value: 'yesterday' },
+                    { label: '3 Hari', value: '3d' },
+                    { label: '1 Minggu', value: '1w' },
+                    { label: '1 Bulan', value: '1m' }
+                  ];
+
+                  periods.forEach(period => {
+                    const button = document.createElement('button');
+                    button.textContent = period.label;
+                    button.onclick = () => {
+                      selectedPeriod = period.value;
+                      const baseDate = new Date(instance.selectedDates[0] || new Date());
+                      const { startDate, endDate } = calculateDateRange(selectedPeriod, baseDate);
+                      initializeCharts(startDate, endDate); // Update grafik berdasarkan periode yang dipilih
+                      instance.setDate([new Date(startDate), new Date(endDate)], true); // Update date range di kalender
+                      instance.close();
+                    };
+                    periodButtons.appendChild(button);
+                  });
+
+                  calendar.appendChild(periodButtons);
+                }
               }
             });
-
-            // Render grafik dengan tanggal default
-            syncCharts(latestDate);
-
-            // Cek setiap 5 detik untuk perubahan data dan refresh grafik jika ada update
-            setInterval(() => {
-              const selectedDate = document.querySelector('#datePicker').value;
-              syncCharts(selectedDate); // Refresh grafik setiap interval
-            }, 5000);
           }
 
-          function syncCharts(selectedDate) {
-            const chartInstances = {};
-            renderChart('containerF', 'Frequency Over Time', 'Frequency (Hz)', 'F', 'Hz', selectedDate, chartInstances);
-            renderChart('containerV1', 'Voltage 1 Over Time', 'Voltage (V)', 'U1', 'V', selectedDate, chartInstances);
-            renderChart('containerV2', 'Voltage 2 Over Time', 'Voltage (V)', 'U2', 'V', selectedDate, chartInstances);
-            renderChart('containerV3', 'Voltage 3 Over Time', 'Voltage (V)', 'U3', 'V', selectedDate, chartInstances);
-            renderChart('containerVAvg', 'Average Voltage Over Time', 'Voltage (V)', 'Uavg', 'V', selectedDate, chartInstances);
-          }
-
-          // Initialize everything
           initializeFlatpickrAndCharts();
-
         </script>
+
       </div>
     </div>
 
